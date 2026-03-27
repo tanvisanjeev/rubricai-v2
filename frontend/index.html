@@ -5,222 +5,295 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>RubricAI v2</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --bg:#F7F7F5;--surface:#FFFFFF;--border:#E4E4E0;--border2:#CFCFCA;
-  --text:#1A1A1A;--muted:#6B6B6B;--subtle:#9A9A94;
-  --accent:#2D5BE3;--accent-bg:#EEF2FD;
-  --s0-bg:#F4F4F2;--s0-text:#9A9A94;--s0-border:#E4E4E0;
-  --s1-bg:#FDF0EF;--s1-text:#C0392B;--s1-border:#F5C6C3;
-  --s2-bg:#FEF9EC;--s2-text:#92690A;--s2-border:#F5DFA0;
-  --s3-bg:#EEF2FD;--s3-text:#2D5BE3;--s3-border:#BDD0F8;
-  --s4-bg:#EDF7F1;--s4-text:#1E6B3C;--s4-border:#AADCC0;
-  --flag:#C0392B;--ok:#1E6B3C;
+  --bg:#0b1120;--surface:#111827;--surface2:#1a2436;--surface3:#1e2d42;
+  --border:#1e3a5f;--border2:#2a4a6e;
+  --text:#f0f6ff;--muted:#8ba4c0;--subtle:#4a6580;
+  --accent:#3b82f6;--accent2:#6366f1;--accent-glow:rgba(59,130,246,0.15);
+  --green:#10b981;--red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;
+  --s0:#4a6580;--s1:#ef4444;--s2:#f59e0b;--s3:#3b82f6;--s4:#10b981;
+  --gradient:linear-gradient(135deg,#3b82f6,#6366f1);
 }
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:14px;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:14px;line-height:1.6;}
 
-.sidebar{width:210px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;}
-.logo{padding:22px 20px 18px;border-bottom:1px solid var(--border);}
-.logo-wordmark{font-size:16px;font-weight:700;letter-spacing:-.3px;}
-.logo-wordmark span{color:var(--accent);}
-.logo-sub{font-size:11px;color:var(--subtle);margin-top:3px;}
-.nav{padding:12px 10px;flex:1;}
-.nav-group{margin-bottom:16px;}
-.nav-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);padding:0 10px 6px;}
-.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:1px;transition:all .15s;}
-.nav-item:hover{background:var(--bg);color:var(--text);}
-.nav-item.active{background:var(--accent-bg);color:var(--accent);font-weight:600;}
+/* SIDEBAR */
+.sidebar{width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
+.logo-text{font-size:20px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.5px;}
+.logo-sub{font-size:10px;color:var(--subtle);margin-top:2px;font-weight:500;letter-spacing:.3px;}
+.nav{flex:1;padding:14px 10px;overflow-y:auto;}
+.nav-label{font-size:9px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:1.2px;padding:6px 10px 4px;margin-top:10px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:1px;}
+.nav-item:hover{background:var(--accent-glow);color:var(--text);}
+.nav-item.active{background:var(--accent-glow);color:var(--accent);font-weight:600;border:1px solid rgba(59,130,246,0.2);}
 .nav-item svg{width:15px;height:15px;flex-shrink:0;stroke-width:1.8;}
-.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
-.footer-label{font-size:11px;color:var(--subtle);line-height:1.7;}
-.footer-label strong{color:var(--muted);font-weight:600;}
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--border);}
+.status-pill{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 12px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0;}
+.status-text{font-size:11px;color:var(--muted);}
 
-.main{margin-left:210px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-.topbar-left h1{font-size:15px;font-weight:600;letter-spacing:-.2px;}
-.topbar-left p{font-size:11px;color:var(--subtle);}
-.topbar-right{display:flex;gap:8px;}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;transition:all .15s;}
-.btn:hover{background:var(--bg);border-color:var(--border2);}
-.btn:disabled{opacity:.45;cursor:not-allowed;}
-.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);}
-.btn-primary:hover{background:#2451cc;border-color:#2451cc;}
+/* MAIN */
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;backdrop-filter:blur(8px);}
+.topbar-left h1{font-size:15px;font-weight:700;letter-spacing:-.2px;}
+.topbar-left p{font-size:11px;color:var(--muted);}
+.topbar-right{display:flex;gap:8px;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:var(--accent);color:#fff;font-family:'Inter',sans-serif;transition:all .15s;}
+.btn:hover{background:#2563eb;transform:translateY(-1px);}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+.btn-ghost{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface3);color:var(--text);border-color:var(--border2);}
 .content{padding:28px;flex:1;}
 .page{display:none;}.page.active{display:block;}
 
-/* UPLOAD */
-.upload-wrap{max-width:560px;margin:0 auto;padding-top:32px;}
-.upload-wrap h2{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px;}
-.upload-wrap .sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
-.upload-zone{border:1.5px dashed var(--border2);border-radius:8px;padding:52px 32px;text-align:center;background:var(--surface);cursor:pointer;transition:all .2s;position:relative;}
-.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-bg);}
-.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.upload-zone h3{font-size:14px;font-weight:600;margin-bottom:6px;pointer-events:none;}
-.upload-zone p{font-size:12px;color:var(--subtle);pointer-events:none;}
-.upload-hint{margin-top:12px;font-size:11px;color:var(--subtle);background:var(--bg);display:inline-block;padding:4px 12px;border-radius:20px;border:1px solid var(--border);pointer-events:none;}
-.file-chosen{margin-top:14px;font-size:12px;color:var(--accent);font-weight:500;}
-.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;}
-.config-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
-.config-card label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:8px;display:block;}
-.config-card select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:7px 10px;font-size:12px;font-family:'Inter',sans-serif;outline:none;}
-.run-btn{display:block;width:100%;margin-top:20px;padding:12px;font-size:13px;font-weight:600;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s;}
-.run-btn:hover{background:#2451cc;}
-.run-btn:disabled{opacity:.5;cursor:not-allowed;}
+/* LANDING */
+.landing-hero{text-align:center;padding:60px 32px 40px;max-width:700px;margin:0 auto;}
+.landing-hero h2{font-size:40px;font-weight:800;letter-spacing:-1px;margin-bottom:14px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2;}
+.landing-hero p{font-size:16px;color:var(--muted);margin-bottom:32px;line-height:1.7;}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-large{padding:12px 28px;font-size:14px;font-weight:700;border-radius:8px;}
+.btn-outline-large{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:12px 28px;font-size:14px;font-weight:600;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
+.btn-outline-large:hover{border-color:var(--accent);color:var(--accent);}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px;}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;text-align:left;transition:border-color .2s;}
+.feature-card:hover{border-color:var(--border2);}
+.feature-icon{width:40px;height:40px;background:var(--accent-glow);border:1px solid rgba(59,130,246,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.feature-icon svg{width:18px;height:18px;color:var(--accent);}
+.feature-card h3{font-size:14px;font-weight:700;margin-bottom:6px;}
+.feature-card p{font-size:12px;color:var(--muted);line-height:1.6;}
+.flow-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:40px 0 0;flex-wrap:wrap;}
+.flow-step{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-align:center;min-width:120px;}
+.flow-num{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.flow-label{font-size:12px;font-weight:600;color:var(--text);}
+.flow-arrow{color:var(--subtle);font-size:18px;}
 
-/* PROGRESS */
-.progress-wrap{margin-top:20px;display:none;}
-.progress-label{font-size:12px;color:var(--muted);margin-bottom:8px;}
-.progress-track{height:6px;background:var(--bg);border:1px solid var(--border);border-radius:99px;overflow:hidden;}
-.progress-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease;width:0%;}
-.progress-status{font-size:11px;color:var(--subtle);margin-top:6px;}
+/* UPLOAD */
+.page-header{margin-bottom:24px;}
+.page-title{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--muted);}
+.upload-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;margin-bottom:16px;}
+.upload-zone{border:2px dashed var(--border2);border-radius:10px;padding:52px 40px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--surface2);}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-glow);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{width:48px;height:48px;background:var(--accent-glow);border:1px solid rgba(59,130,246,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.upload-icon svg{width:22px;height:22px;color:var(--accent);}
+.upload-zone h3{font-size:15px;font-weight:700;margin-bottom:6px;pointer-events:none;}
+.upload-zone p{font-size:12px;color:var(--muted);pointer-events:none;}
+.upload-hint{margin-top:10px;font-size:11px;color:var(--subtle);background:var(--surface);display:inline-block;padding:4px 12px;border-radius:20px;border:1px solid var(--border);pointer-events:none;}
+.file-tag{margin-top:12px;font-size:12px;color:var(--accent);font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;}
+.config-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+.config-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.config-card label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:7px;display:block;}
+.config-card select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:12px;font-family:'Inter',sans-serif;outline:none;}
+.config-card select:focus{border-color:var(--accent);}
+.run-btn{width:100%;padding:14px;font-size:14px;font-weight:700;border-radius:8px;background:var(--gradient);color:#fff;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;margin-top:16px;letter-spacing:-.1px;}
+.run-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 4px 20px rgba(59,130,246,.3);}
+.run-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+.progress-wrap{margin-top:14px;display:none;}
+.prog-label{font-size:12px;color:var(--muted);margin-bottom:7px;font-weight:500;}
+.prog-track{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
+.prog-bar{height:100%;background:var(--gradient);border-radius:3px;transition:width .4s ease;width:0%;}
+.prog-status{font-size:11px;color:var(--subtle);margin-top:5px;}
 
 /* STATS */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 22px;}
-.stat-num{font-size:32px;font-weight:700;letter-spacing:-1px;margin-bottom:3px;}
-.stat-label{font-size:11px;color:var(--subtle);font-weight:500;text-transform:uppercase;letter-spacing:.5px;}
-.stat-card.warn .stat-num{color:var(--flag);}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;transition:border-color .2s;}
+.stat-card:hover{border-color:var(--border2);}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gradient);}
+.stat-card.green::after{background:linear-gradient(90deg,var(--green),#34d399);}
+.stat-card.red::after{background:linear-gradient(90deg,var(--red),#f87171);}
+.stat-card.amber::after{background:linear-gradient(90deg,var(--amber),#fbbf24);}
+.stat-label{font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.stat-value{font-size:32px;font-weight:800;color:var(--accent);line-height:1;margin-bottom:4px;letter-spacing:-1px;}
+.stat-card.green .stat-value{color:var(--green);}
+.stat-card.red .stat-value{color:var(--red);}
+.stat-card.amber .stat-value{color:var(--amber);}
+.stat-meta{font-size:11px;color:var(--muted);}
 
-/* SESSION TOGGLE */
-.session-toggle{display:flex;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;width:fit-content;margin-bottom:16px;}
-.sess-btn{padding:6px 16px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:var(--surface);color:var(--muted);font-family:'Inter',sans-serif;transition:all .15s;}
-.sess-btn.active{background:var(--accent-bg);color:var(--accent);font-weight:600;}
+/* SESSION TABS */
+.sess-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;}
+.sess-tab{padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--subtle);font-family:'Inter',sans-serif;border-bottom:2px solid transparent;transition:all .15s;}
+.sess-tab:hover{color:var(--text);}
+.sess-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 
 /* TABLE */
-.table-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-.table-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
-.table-header h2{font-size:13px;font-weight:600;}
-.table-meta{font-size:11px;color:var(--subtle);margin-top:2px;}
-.search-box{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;width:200px;outline:none;}
-.search-box:focus{border-color:var(--accent);}
-.search-box::placeholder{color:var(--subtle);}
-table{width:100%;border-collapse:collapse;}
-thead th{background:var(--bg);padding:9px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--subtle);border-bottom:1px solid var(--border);white-space:nowrap;}
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.table-top{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.table-top h3{font-size:14px;font-weight:700;}
+.table-meta-text{font-size:11px;color:var(--muted);margin-top:2px;}
+.search-input{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;width:220px;outline:none;}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--subtle);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;}
 tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
-tbody tr:hover{background:#FAFAF8;}
+tbody tr:hover td{background:var(--accent-glow);}
 tbody tr:last-child{border-bottom:none;}
-td{padding:9px 10px;white-space:nowrap;}
-.id-cell{font-family:'SF Mono','Fira Code',monospace;font-size:11px;color:var(--accent);font-weight:500;}
-.sim-tag{font-size:10px;color:var(--muted);background:var(--bg);border:1px solid var(--border);padding:2px 7px;border-radius:4px;}
-.badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:19px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.2px;}
-.b0{background:var(--s0-bg);color:var(--s0-text);border:1px solid var(--s0-border);}
-.b1{background:var(--s1-bg);color:var(--s1-text);border:1px solid var(--s1-border);}
-.b2{background:var(--s2-bg);color:var(--s2-text);border:1px solid var(--s2-border);}
-.b3{background:var(--s3-bg);color:var(--s3-text);border:1px solid var(--s3-border);}
-.b4{background:var(--s4-bg);color:var(--s4-text);border:1px solid var(--s4-border);}
-.score-cell{font-weight:600;font-size:12px;}
-.status-flag{font-size:11px;font-weight:600;color:var(--flag);}
-.status-ok{font-size:11px;font-weight:500;color:var(--ok);}
-.status-inc{font-size:11px;color:var(--subtle);}
-.comp-yes{color:var(--ok);font-size:12px;font-weight:500;}
-.comp-no{color:var(--flag);font-size:12px;font-weight:500;}
+td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
+.id-cell{font-family:'SF Mono','Fira Mono',monospace;font-size:11px;color:var(--accent);font-weight:600;}
+.sim-pill{font-size:10px;background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:20px;color:var(--muted);}
+.bdg{display:inline-flex;align-items:center;justify-content:center;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;letter-spacing:.2px;}
+.b0{background:rgba(255,255,255,.04);color:var(--subtle);border:1px solid var(--border);}
+.b1{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border);}
+.b2{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border2);}
+.b3{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.2);}
+.b4{background:rgba(59,130,246,.15);color:#bfdbfe;border:1px solid rgba(59,130,246,.25);}
+.sc{font-weight:600;font-size:12px;color:var(--muted);}
+.st-flag{font-size:11px;font-weight:600;color:var(--muted);}
+.st-ok{font-size:11px;font-weight:500;color:var(--subtle);}
+.st-inc{font-size:11px;color:var(--subtle);}
+.comp-y{color:var(--muted);font-size:12px;font-weight:500;}
+.comp-n{color:var(--subtle);font-size:12px;font-weight:500;}
 
 /* LEGEND */
-.legend{display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+.legend-row{display:flex;gap:14px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
 
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;display:none;align-items:center;justify-content:center;}
-.modal-overlay.open{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:720px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.12);}
-.modal-top{padding:22px 24px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;}
-.modal-id{font-family:monospace;font-size:11px;color:var(--accent);margin-bottom:3px;}
-.modal-name{font-size:17px;font-weight:700;letter-spacing:-.3px;}
-.modal-close{background:var(--bg);border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.modal-body{padding:20px 24px;}
-.modal-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
-.mini-stat{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px 14px;}
-.mini-stat-val{font-size:22px;font-weight:700;letter-spacing:-.5px;}
-.mini-stat-label{font-size:10px;color:var(--subtle);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
-.sec-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin:16px 0 10px;}
-.ind-list{display:flex;flex-direction:column;gap:8px;}
-.ind-row{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px 14px;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:740px;max-height:88vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.5);}
+.modal-head{padding:22px 26px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;}
+.m-id{font-family:monospace;font-size:11px;color:var(--accent);margin-bottom:3px;font-weight:600;}
+.m-name{font-size:18px;font-weight:800;}
+.m-close{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.m-close:hover{background:var(--surface3);}
+.modal-body{padding:20px 26px;}
+.m-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.m-stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.m-val{font-size:22px;font-weight:800;color:var(--accent);}
+.m-lbl{font-size:10px;color:var(--subtle);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+.sec-ttl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.ind-row{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px;}
 .ind-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.ind-key{font-size:11px;font-weight:700;}
-.ind-desc{font-size:11px;color:var(--muted);margin-bottom:6px;}
-.ind-rationale{font-size:11px;color:var(--text);line-height:1.55;}
-.ind-quotes{margin-top:6px;display:flex;flex-direction:column;gap:3px;}
-.ind-quote{font-size:10px;color:var(--subtle);font-style:italic;padding-left:8px;border-left:2px solid var(--border2);}
-.progress-track2{height:3px;background:var(--border);border-radius:99px;margin-top:8px;}
-.pf{height:100%;border-radius:99px;}
-.pf1{background:var(--s1-text);}.pf2{background:var(--s2-text);}.pf3{background:var(--s3-text);}.pf4{background:var(--s4-text);}
+.ind-key{font-size:11px;font-weight:700;color:var(--text);}
+.ind-desc{font-size:11px;color:var(--muted);margin-bottom:5px;}
+.ind-rat{font-size:11px;color:var(--muted);line-height:1.6;}
+.ind-q{font-size:10px;color:var(--subtle);font-style:italic;padding:4px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;margin-top:4px;}
+.lv-bar{display:flex;gap:3px;margin-top:8px;}
+.lv-seg{flex:1;height:3px;border-radius:2px;background:var(--border);}
+.seg1.on{background:var(--red);}.seg2.on{background:var(--amber);}
+.seg3.on{background:var(--accent);}.seg4.on{background:var(--green);}
 
 /* SUMMARY */
-.insights-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
-.insight-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px;}
-.insight-card.warn{border-left:3px solid var(--flag);}
-.insight-card.good{border-left:3px solid var(--ok);}
-.insight-card.info{border-left:3px solid var(--accent);}
-.insight-card h3{font-size:13px;font-weight:600;margin-bottom:6px;}
-.insight-card p{font-size:12px;color:var(--muted);line-height:1.55;}
-.chart-section{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
-.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:22px;}
-.chart-card h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:16px;}
+.ins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+.ins-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;border-left:3px solid var(--border2);}
+.ins-card.warn{border-left-color:var(--border2);}
+.ins-card.good{border-left-color:var(--border2);}
+.ins-card.info{border-left-color:var(--border2);}
+.ins-card h3{font-size:13px;font-weight:700;margin-bottom:5px;}
+.ins-card p{font-size:12px;color:var(--muted);line-height:1.6;}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.chart-ttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:16px;}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
-.bar-label{font-size:10px;color:var(--muted);width:60px;flex-shrink:0;}
-.bar-track{flex:1;height:7px;background:var(--bg);border-radius:99px;border:1px solid var(--border);overflow:hidden;}
-.bar-fill{height:100%;border-radius:99px;transition:width .5s ease;}
-.bar-val{font-size:11px;font-weight:600;width:28px;text-align:right;}
-.export-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.export-opt{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;cursor:pointer;transition:all .15s;}
-.export-opt:hover{border-color:var(--accent);background:var(--accent-bg);}
-.export-type{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-bottom:8px;}
-.export-opt h4{font-size:13px;font-weight:600;margin-bottom:4px;}
-.export-opt p{font-size:12px;color:var(--subtle);}
-.sec-divider{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.bar-lbl{font-size:10px;color:var(--muted);width:62px;flex-shrink:0;}
+.bar-track{flex:1;height:7px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+.bar-val{font-size:11px;font-weight:700;width:28px;text-align:right;}
+.exp-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.exp-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .15s;}
+.exp-card:hover{border-color:var(--accent);background:var(--accent-glow);}
+.exp-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-bottom:8px;}
+.exp-card h4{font-size:13px;font-weight:700;margin-bottom:4px;}
+.exp-card p{font-size:12px;color:var(--muted);}
 
-/* EMPTY STATE */
-.empty-state{text-align:center;padding:64px 32px;color:var(--subtle);}
-.empty-state h3{font-size:15px;font-weight:600;color:var(--muted);margin-bottom:8px;}
-.empty-state p{font-size:13px;margin-bottom:20px;}
+/* AI ASSISTANT */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px);max-width:820px;}
+.chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-bottom:16px;}
+.chat-msg{display:flex;gap:10px;align-items:flex-start;}
+.chat-msg.user{flex-direction:row-reverse;}
+.bubble{max-width:72%;padding:11px 15px;border-radius:10px;font-size:13px;line-height:1.65;}
+.chat-msg.assistant .bubble{background:var(--surface);border:1px solid var(--border);}
+.chat-msg.user .bubble{background:var(--gradient);color:#fff;}
+.avatar{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.chat-msg.assistant .avatar{background:var(--accent-glow);color:var(--accent);border:1px solid rgba(59,130,246,.2);}
+.chat-msg.user .avatar{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.chat-input-row{display:flex;gap:10px;padding-top:14px;border-top:1px solid var(--border);}
+.chat-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none;resize:none;}
+.chat-input:focus{border-color:var(--accent);}
+.chat-input::placeholder{color:var(--subtle);}
+.chat-suggestions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.sugg{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s;}
+.sugg:hover{border-color:var(--accent);color:var(--accent);}
+
+/* FLOW ROW FIX */
+.flow-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:40px 0 0;flex-wrap:nowrap;overflow-x:auto;}
+.flow-step{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 20px;text-align:center;min-width:110px;flex-shrink:0;}
+
+/* RUBRIC */
+.rubric-cluster{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+.cluster-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2);}
+.cluster-title{font-size:14px;font-weight:700;color:var(--text);}
+.cluster-meta{font-size:11px;color:var(--muted);background:var(--accent-glow);border:1px solid rgba(59,130,246,.15);padding:3px 10px;border-radius:20px;}
+.rubric-ind{padding:20px 22px;border-bottom:1px solid var(--border);}
+.rubric-ind:last-child{border-bottom:none;}
+.rind-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.rind-id{font-size:10px;font-weight:700;background:var(--surface2);color:var(--accent);padding:3px 8px;border-radius:4px;border:1px solid var(--border);font-family:monospace;flex-shrink:0;}
+.rind-name{font-size:13px;font-weight:600;color:var(--text);}
+.levels-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.level-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.level-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.level-num{display:inline-block;width:18px;height:18px;border-radius:4px;background:var(--accent-glow);color:var(--accent);font-size:10px;font-weight:800;text-align:center;line-height:18px;margin-right:5px;border:1px solid rgba(59,130,246,.2);}
+.level-txt{font-size:11px;color:var(--muted);line-height:1.6;}
+
+/* EMPTY */
+.empty{text-align:center;padding:80px 32px;}
+.empty h3{font-size:17px;font-weight:700;margin-bottom:8px;}
+.empty p{font-size:13px;color:var(--muted);margin-bottom:24px;}
 
 /* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:10px 18px;border-radius:6px;font-size:12px;font-weight:500;z-index:999;transform:translateY(60px);opacity:0;transition:all .25s;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:11px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:999;transform:translateY(60px);opacity:0;transition:all .25s;box-shadow:0 8px 32px rgba(0,0,0,.4);}
 .toast.show{transform:translateY(0);opacity:1;}
-.toast.err{background:var(--flag);}
+.toast.err{border-color:var(--red);color:#fca5a5;}
+.toast.ok{border-color:var(--green);color:#6ee7b7;}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 </style>
 </head>
 <body>
 
 <aside class="sidebar">
   <div class="logo">
-    <div class="logo-wordmark">Rubric<span>AI</span></div>
-    <div class="logo-sub">Interview Assessment Platform</div>
+    <div class="logo-text">RubricAI</div>
+    <div class="logo-sub">AI-Powered Interview Assessment</div>
   </div>
   <nav class="nav">
-    <div class="nav-group">
-      <div class="nav-label">Workspace</div>
-      <div class="nav-item active" id="nav-upload" onclick="showPage('upload')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-        Upload and Evaluate
-      </div>
-      <div class="nav-item" id="nav-overview" onclick="showPage('overview')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Class Overview
-      </div>
-      <div class="nav-item" id="nav-summary" onclick="showPage('summary')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        Summary and Charts
-      </div>
+    <div class="nav-label">Main</div>
+    <div class="nav-item active" id="nav-landing" onclick="showPage('landing')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
     </div>
-    <div class="nav-group">
-      <div class="nav-label">Tools</div>
-      <div class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-        AI Assistant
-      </div>
-      <div class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-        Rubric Framework
-      </div>
+    <div class="nav-item" id="nav-upload" onclick="showPage('upload')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      Upload and Evaluate
+    </div>
+    <div class="nav-item" id="nav-overview" onclick="showPage('overview')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Class Overview
+    </div>
+    <div class="nav-item" id="nav-summary" onclick="showPage('summary')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Summary and Charts
+    </div>
+    <div class="nav-label">Tools</div>
+    <div class="nav-item" id="nav-assistant" onclick="showPage('assistant')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      AI Assistant
+    </div>
+    <div class="nav-item" id="nav-rubric" onclick="showPage('rubric')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Rubric Framework
     </div>
   </nav>
   <div class="sidebar-footer">
-    <div class="footer-label">
-      <strong>CPS LEARN Lab</strong><br>
-      Northeastern University<br>
-      Built by Tanvi Kadam
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      <span class="status-text">AI Active · v2.0</span>
     </div>
   </div>
 </aside>
@@ -228,143 +301,226 @@ td{padding:9px 10px;white-space:nowrap;}
 <main class="main">
   <div class="topbar">
     <div class="topbar-left">
-      <h1 id="page-title">Upload and Evaluate</h1>
-      <p id="page-sub">Upload a CSV file to begin evaluation</p>
+      <h1 id="page-title">Home</h1>
+      <p id="page-sub">AI-powered student interview assessment</p>
     </div>
     <div class="topbar-right">
-      <button class="btn" id="btn-csv" onclick="exportCSV()" disabled>Export CSV</button>
-      <button class="btn" id="btn-pdf" onclick="exportPDF()" disabled>Export PDF</button>
-      <button class="btn btn-primary" onclick="showPage('upload')">New Evaluation</button>
+      <button class="btn btn-ghost" id="btn-csv" onclick="exportCSV()" disabled>Export CSV</button>
+      <button class="btn btn-ghost" id="btn-pdf" onclick="exportPDF()" disabled>Export PDF</button>
+      <button class="btn" onclick="showPage('upload')">New Evaluation</button>
     </div>
   </div>
 
   <div class="content">
 
+    <!-- LANDING -->
+    <div class="page active" id="page-landing">
+      <div class="landing-hero">
+        <h2>AI-Powered Student Assessment</h2>
+        <p>Upload interview transcripts and receive automated, rubric-aligned scores across Communication and Critical Thinking, consistently, at scale, and in a fraction of the time.</p>
+        <div class="hero-btns">
+          <button class="btn btn-large" onclick="showPage('upload')">Get Started</button>
+          <button class="btn-outline-large" onclick="showPage('rubric')">View Rubric Framework</button>
+        </div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Responsible AI</h3>
+          <p>Scores are grounded in a research-backed rubric, not black-box judgments. Every score includes a rationale and evidence from the transcript.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h3>Transparent Scoring</h3>
+          <p>Instructors can see exactly why a student received a score — supporting fair, explainable, and evidence-based assessment decisions.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3>Saves Hours of Work</h3>
+          <p>What takes an instructor hours to evaluate manually is completed in minutes, freeing time for meaningful feedback and instruction.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <h3>Consistent Across Students</h3>
+          <p>AI evaluation applies the same rubric criteria to every student equally — removing evaluator fatigue and subjective variation.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>Supports Student Growth</h3>
+          <p>Detailed per-indicator feedback gives students clear, actionable insight into their communication and critical thinking skills.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <h3>Scalable Across Cohorts</h3>
+          <p>Evaluate one student or an entire class with the same effort. Designed to scale as programs grow without increasing instructor workload.</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-step"><div class="flow-num">Step 1</div><div class="flow-label">Upload CSV</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-num">Step 2</div><div class="flow-label">AI Scores</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-num">Step 3</div><div class="flow-label">Review Results</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-num">Step 4</div><div class="flow-label">Export Report</div></div>
+      </div>
+    </div>
+
     <!-- UPLOAD -->
-    <div class="page active" id="page-upload">
-      <div class="upload-wrap">
-        <h2>New Evaluation</h2>
-        <p class="sub">Upload a merged sessions CSV file. RubricAI will score all indicators using Claude.</p>
+    <div class="page" id="page-upload">
+      <div class="page-header">
+        <div class="page-title">New Evaluation</div>
+        <div class="page-sub">Upload a merged sessions CSV and configure evaluation parameters.</div>
+      </div>
+      <div class="upload-card">
         <div class="upload-zone" id="drop-zone">
           <input type="file" accept=".csv" onchange="handleFile(this)"/>
-          <h3>Select a CSV file</h3>
+          <div class="upload-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          </div>
+          <h3>Select a transcript file</h3>
           <p>Drag and drop, or click to browse</p>
-          <div class="upload-hint">Accepts: merged_sessions_*.csv</div>
-          <div class="file-chosen" id="file-name"></div>
+          <div class="file-tag" id="file-name"></div>
         </div>
-        <div class="config-grid">
-          <div class="config-card">
-            <label>Model</label>
-            <select id="cfg-model">
-              <option value="sonnet">Claude Sonnet (full quality)</option>
-              <option value="haiku">Claude Haiku (faster, cheaper)</option>
-            </select>
-          </div>
-          <div class="config-card">
-            <label>Flag Threshold</label>
-            <select id="cfg-flag">
-              <option value="2">Flag if avg below 2.0</option>
-              <option value="1.5">Flag if avg below 1.5</option>
-              <option value="3">Flag if avg below 3.0</option>
-            </select>
-          </div>
-        </div>
+
         <div class="progress-wrap" id="progress-wrap">
-          <div class="progress-label">Evaluating students...</div>
-          <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
-          <div class="progress-status" id="progress-status">Sending request to backend...</div>
+          <div class="prog-label">Evaluating with Claude...</div>
+          <div class="prog-track"><div class="prog-bar" id="prog-bar"></div></div>
+          <div class="prog-status" id="prog-status">Uploading...</div>
         </div>
-        <button class="run-btn" id="run-btn" onclick="runEvaluation()" disabled>Run Evaluation</button>
+        <button class="run-btn" id="run-btn" onclick="runEval()" disabled>Run Evaluation</button>
       </div>
     </div>
 
     <!-- OVERVIEW -->
     <div class="page" id="page-overview">
-      <div id="overview-empty" class="empty-state">
-        <h3>No evaluation results yet</h3>
-        <p>Upload a CSV file and run an evaluation to see results here.</p>
-        <button class="btn btn-primary" onclick="showPage('upload')">Go to Upload</button>
+      <div id="ov-empty" class="empty">
+        <h3>No results yet</h3>
+        <p>Upload a CSV and run an evaluation to see class results here.</p>
+        <button class="btn" onclick="showPage('upload')">Go to Upload</button>
       </div>
-      <div id="overview-content" style="display:none">
-        <div class="stats-grid" id="stats-grid"></div>
-        <div class="legend">
-          <span style="font-size:11px;color:var(--subtle);font-weight:600;margin-right:4px">Score:</span>
-          <span class="legend-item"><span class="badge b0">N/A</span> Not assessed</span>
-          <span class="legend-item"><span class="badge b1">Beg</span> Beginning</span>
-          <span class="legend-item"><span class="badge b2">Dev</span> Developing</span>
-          <span class="legend-item"><span class="badge b3">App</span> Applying</span>
-          <span class="legend-item"><span class="badge b4">Mas</span> Mastery</span>
+      <div id="ov-content" style="display:none">
+        <div class="stats-row" id="stats-row"></div>
+        <div class="legend-row">
+          <span style="font-size:11px;color:var(--subtle);font-weight:700;margin-right:4px">Score:</span>
+          <span class="legend-item"><span class="bdg b0">N/A</span> Not assessed</span>
+          <span class="legend-item"><span class="bdg b1">Beg</span> Beginning</span>
+          <span class="legend-item"><span class="bdg b2">Dev</span> Developing</span>
+          <span class="legend-item"><span class="bdg b3">App</span> Applying</span>
+          <span class="legend-item"><span class="bdg b4">Mas</span> Mastery</span>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <div class="session-toggle">
-            <button class="sess-btn active" onclick="switchSession('user',this)">User Session</button>
-            <button class="sess-btn" onclick="switchSession('client',this)">Client Session</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div class="sess-tabs">
+            <button class="sess-tab active" onclick="switchSess('user',this)">User Session</button>
+            <button class="sess-tab" onclick="switchSess('client',this)">Client Session</button>
           </div>
-          <input class="search-box" placeholder="Search by student ID..." oninput="filterTable(this.value)"/>
+          <input class="search-input" placeholder="Search by student ID..." oninput="filterTbl(this.value)"/>
         </div>
         <div class="table-card">
-          <div class="table-header">
+          <div class="table-top">
             <div>
-              <h2 id="tbl-title">Class Overview</h2>
-              <div class="table-meta" id="tbl-meta"></div>
+              <div class="table-top h3" id="tbl-title" style="font-size:14px;font-weight:700">Class Overview</div>
+              <div class="table-meta-text" id="tbl-meta"></div>
             </div>
           </div>
-          <div style="overflow-x:auto">
-            <table><thead id="tbl-head"></thead><tbody id="tbl-body"></tbody></table>
-          </div>
+          <div style="overflow-x:auto"><table><thead id="tbl-head"></thead><tbody id="tbl-body"></tbody></table></div>
         </div>
       </div>
     </div>
 
     <!-- SUMMARY -->
     <div class="page" id="page-summary">
-      <div id="summary-empty" class="empty-state">
+      <div id="sum-empty" class="empty">
         <h3>No data to summarize</h3>
-        <p>Run an evaluation first to see charts and insights.</p>
-        <button class="btn btn-primary" onclick="showPage('upload')">Go to Upload</button>
+        <p>Run an evaluation first.</p>
+        <button class="btn" onclick="showPage('upload')">Go to Upload</button>
       </div>
-      <div id="summary-content" style="display:none">
-        <div class="sec-divider">Insights</div>
-        <div class="insights-row" id="insights-row"></div>
-        <div class="sec-divider">Score Analysis</div>
-        <div class="chart-section">
-          <div class="chart-card"><h3>Average Score by Indicator — User Session</h3><div id="chart-user"></div></div>
-          <div class="chart-card"><h3>Average Score by Indicator — Client Session</h3><div id="chart-client"></div></div>
+      <div id="sum-content" style="display:none">
+        <div class="ins-grid" id="ins-grid"></div>
+        <div class="charts-row">
+          <div class="chart-card"><div class="chart-ttl">Avg Score — User Session</div><div id="chart-user"></div></div>
+          <div class="chart-card"><div class="chart-ttl">Avg Score — Client Session</div><div id="chart-client"></div></div>
         </div>
-        <div class="sec-divider">Export</div>
-        <div class="export-row">
-          <div class="export-opt" onclick="exportCSV()">
-            <div class="export-type">CSV</div>
+        <div class="exp-row">
+          <div class="exp-card" onclick="exportCSV()">
+            <div class="exp-type">CSV</div>
             <h4>Spreadsheet Export</h4>
-            <p>All indicators and scores for all students. Compatible with Excel and Google Sheets.</p>
+            <p>All indicators and scores. Compatible with Excel and Google Sheets.</p>
           </div>
-          <div class="export-opt" onclick="exportPDF()">
-            <div class="export-type">PDF</div>
+          <div class="exp-card" onclick="exportPDF()">
+            <div class="exp-type">PDF</div>
             <h4>Formatted Report</h4>
-            <p>Print-ready class report with summary statistics and full evaluation table.</p>
+            <p>Print-ready class report with summary stats and full evaluation table.</p>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- AI ASSISTANT -->
+    <div class="page" id="page-assistant">
+      <div class="page-header">
+        <div class="page-title">AI Assistant</div>
+        <div class="page-sub">Ask questions about student results or the rubric framework.</div>
+      </div>
+      <div class="chat-suggestions">
+        <div class="sugg" onclick="fillChat('Which students need the most support?')">Which students need the most support?</div>
+        <div class="sugg" onclick="fillChat('What is the average score for C1_I1?')">Average score for C1_I1?</div>
+        <div class="sugg" onclick="fillChat('What does Level 3 mean for active listening?')">What does L3 mean for active listening?</div>
+        <div class="sugg" onclick="fillChat('How many students are flagged and why?')">How many students flagged?</div>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="chat-msg assistant">
+            <div class="avatar">AI</div>
+            <div class="bubble">Hello. I can help you analyse evaluation results or answer questions about the rubric. Run an evaluation first, then ask me anything about the students or their scores.</div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about student results or the rubric..." onkeydown="chatKey(event)"></textarea>
+          <button class="btn" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RUBRIC -->
+    <div class="page" id="page-rubric">
+      <div class="page-header">
+        <div class="page-title">Rubric Framework</div>
+        <div class="page-sub">Full assessment rubric — Communication and Critical Thinking indicators with level descriptors.</div>
+      </div>
+      <div id="rubric-content"></div>
     </div>
 
   </div>
 </main>
 
 <!-- MODAL -->
-<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+<div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <div class="modal-top">
+    <div class="modal-head">
       <div>
-        <div class="modal-id" id="m-id"></div>
-        <div class="modal-name" id="m-sim"></div>
-        <div style="margin-top:5px;font-size:12px" id="m-comp"></div>
+        <div class="m-id" id="m-id"></div>
+        <div class="m-name" id="m-sim"></div>
+        <div style="margin-top:4px;font-size:12px" id="m-comp"></div>
       </div>
-      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+      <button class="m-close" onclick="closeModal()">&#x2715;</button>
     </div>
     <div class="modal-body">
-      <div class="modal-stats" id="m-stats"></div>
-      <div id="m-user-section"></div>
-      <div id="m-client-section"></div>
+      <div class="m-stats" id="m-stats"></div>
+      <div id="m-user"></div>
+      <div id="m-client"></div>
     </div>
   </div>
 </div>
@@ -372,331 +528,207 @@ td{padding:9px 10px;white-space:nowrap;}
 <div class="toast" id="toast"></div>
 
 <script>
-const API = 'http://localhost:8000';
-let results = [];
-let currentSession = 'user';
-let selectedFile = null;
-let flagThreshold = 2.0;
+const API='http://localhost:8000';
+let results=[],sess='user',file=null,flagT=2.0,chatHist=[];
+const U_IND=['C1_I1','C1_I2','C1_I3','C1_I5','C1_I6','CT1_I1','CT1_I3'];
+const C_IND=['C2_I1','C2_I2','C2_I3','CT2_I1','CT2_I2','CT2_I3','CT2_I4','CT3_I1','CT3_I2','CT3_I4'];
+const DESC={C1_I1:'Asks clear, open-ended questions',C1_I2:'Uses follow-up questions to probe deeper',C1_I3:'Demonstrates active listening',C1_I5:'Introduces self and purpose professionally',C1_I6:'Builds rapport through tone and curiosity',CT1_I1:'Asks targeted questions to explore client problem',CT1_I3:'Evaluates relevance of information',C2_I1:'Organizes ideas logically',C2_I2:'Connects claims to evidence',C2_I3:'Uses clear, concise, professional tone',CT2_I1:'Identifies relationships across data points',CT2_I2:'Recognizes patterns, themes, root causes',CT2_I3:'Synthesizes evidence into insights',CT2_I4:'Organizes insights with logical structure',CT3_I1:'Clearly frames the decision or direction',CT3_I2:'Connects recommendations to evidence',CT3_I4:'Provides logical, feasible recommendation'};
+const SL={0:'N/A',1:'Beginning',2:'Developing',3:'Applying',4:'Mastery'};
+const BC=['b0','b1','b2','b3','b4'],BS=['N/A','Beg','Dev','App','Mas'];
+const RD=[
+  {cluster:'Communication — Cluster 1: Interview',session:'User Session',inds:[
+    {id:'C1_I1',name:'Asks clear, open-ended questions',ls:['0–1 open-ended questions. Vague or leading phrasing.','2–3 questions. Sometimes conflates topics. Not strategically phrased.','4–5 questions. Clearly phrased, one topic at a time.','6+ questions. Strategic phrasing. Invites storytelling.']},
+    {id:'C1_I2',name:'Uses follow-up questions to probe deeper',ls:['0–20% follow-ups. Misses emotional cues.','21–45% follow-ups. Generic, 1-level probing.','46–65% follow-ups. References interviewee words. 2-level probing.','65%+ follow-ups. Names what they probe. 3+ level probing.']},
+    {id:'C1_I3',name:'Demonstrates active listening',ls:['Never paraphrases. Interrupts 3+ times.','1–2 behaviors. Occasional inaccurate paraphrase.','3–4 behaviors. Accurate paraphrasing. Clarifying questions.','5+ behaviors. Interpretive paraphrasing. Thematic summaries.']},
+    {id:'C1_I5',name:'Introduces self and purpose professionally',ls:['Introduction absent or incomplete.','Has name/role/purpose but lacks relevance framing.','Clear logical introduction. Purpose linked to context.','Concise and comprehensive. Sets expectations. Explains value.']},
+    {id:'C1_I6',name:'Builds rapport through tone, curiosity, responsiveness',ls:['0 rapport behaviors. Transactional.','1–2 behaviors. Generic acknowledgments.','3–4 behaviors. Specific validation. Acknowledges emotion.','5+ behaviors. Integrates stakeholder language. Validates expertise.']}
+  ]},
+  {cluster:'Communication — Cluster 2: Communicating Ideas Clearly',session:'Client Session',inds:[
+    {id:'C2_I1',name:'Organizes ideas logically with clear transitions',ls:['Ideas in arbitrary order. No logic.','Basic sequencing. Transitions implicit.','Logical sequence. Organizational logic evident.','Coherent argument arc. Connects how earlier points inform later ones.']},
+    {id:'C2_I2',name:'Connects claims to evidence',ls:['0–20% claims supported. Opinion-based.','21–40% claims supported. Connections weak.','41–60% claims supported. Explicit reasoning.','60%+ claims. Explains why evidence matters. Addresses limitations.']},
+    {id:'C2_I3',name:'Uses a clear, concise, professional tone',ls:['Difficult to follow. 5+ vague referents per 10 min.','Understandable but uneven. 2–4 imprecise instances.','Clear and complete. Under 2 vague referents. Professional.','Economical and precise. Audience-calibrated register.']}
+  ]},
+  {cluster:'Critical Thinking — Cluster 1: Information Analysis',session:'User Session',inds:[
+    {id:'CT1_I1',name:'Asks clear and targeted questions to explore the problem',ls:['0–1 relevant questions. Broad or generic.','2–3 questions. Lack focus or redundant.','4–5 questions. Logical inquiry path.','6+ targeted questions. Tests understanding. Meta-questions.']},
+    {id:'CT1_I3',name:'Evaluates relevance of information',ls:['Follows predetermined sequence regardless of responses.','Occasional adjustment but surface-driven.','Pursues relevant content. Probes vague answers.','Separates experience from opinion. Flags contradictions.']}
+  ]},
+  {cluster:'Critical Thinking — Cluster 2: Insight Synthesis',session:'Client Session',inds:[
+    {id:'CT2_I1',name:'Identifies relationships across data points',ls:['0 explicit connections.','1–2 basic connections. Co-occurrence only.','3–4 connections with mechanisms explained.','5+ integrated connections. Causal chains.']},
+    {id:'CT2_I2',name:'Recognizes patterns, themes, and root causes',ls:['0 patterns. Purely descriptive.','1–2 patterns with basic labeling.','3–4 patterns with examples. Root cause distinction.','5+ patterns including latent themes. Root cause rationale.']},
+    {id:'CT2_I3',name:'Synthesizes evidence into insights and implications',ls:['Restates facts only. No causal reasoning.','1–2 descriptive patterns. Incomplete causation.','2–3 insights with causal reasoning. E→I→I structure.','4+ systemic insights. Multi-level causal reasoning.']},
+    {id:'CT2_I4',name:'Organizes insights with clear logical structure',ls:['Disconnected list.','Attempts grouping but logic unclear.','Clear framework explicitly named. Logical sequence.','Hierarchical structure. States organizing principle.']}
+  ]},
+  {cluster:'Critical Thinking — Cluster 3: Decision Framing',session:'Client Session',inds:[
+    {id:'CT3_I1',name:'Clearly frames the decision or direction',ls:['Does not state decision. Implicit.','Partially articulates. Scope vague.','Clear decision question with criteria.','Precise decision space with options and constraints.']},
+    {id:'CT3_I2',name:'Connects recommendations directly to evidence',ls:['0 connections to evidence.','1–2 weak evidence citations.','60–80% recommendations grounded in evidence.','80%+ with multiple converging evidence. Reasoning auditable.']},
+    {id:'CT3_I4',name:'Provides a logical, feasible recommendation aligned with client needs',ls:['No clear recommendation or inconsistent.','Generic recommendation. Partially misaligned.','Specific and actionable. Feasible. 2–3 sentence explanation.','Focused and tailored. Follows from prior analysis.']}
+  ]}
+];
 
-const USER_INDS = ['C1_I1','C1_I2','C1_I3','C1_I5','C1_I6','CT1_I1','CT1_I3'];
-const CLIENT_INDS = ['C2_I1','C2_I2','C2_I3','CT2_I1','CT2_I2','CT2_I3','CT2_I4','CT3_I1','CT3_I2','CT3_I4'];
-const IND_DESC = {
-  C1_I1:'Asks clear, open-ended questions',
-  C1_I2:'Uses follow-up questions to probe deeper',
-  C1_I3:'Demonstrates active listening',
-  C1_I5:'Introduces self and purpose professionally',
-  C1_I6:'Builds rapport through tone and curiosity',
-  CT1_I1:'Asks targeted questions to explore client problem',
-  CT1_I3:'Evaluates relevance of information',
-  C2_I1:'Organizes ideas logically',
-  C2_I2:'Connects claims to evidence',
-  C2_I3:'Uses clear, concise, professional tone',
-  CT2_I1:'Identifies relationships across data points',
-  CT2_I2:'Recognizes patterns, themes, root causes',
-  CT2_I3:'Synthesizes evidence into insights',
-  CT2_I4:'Organizes insights with logical structure',
-  CT3_I1:'Clearly frames the decision or direction',
-  CT3_I2:'Connects recommendations to evidence',
-  CT3_I4:'Provides logical, feasible recommendation',
-};
-const SCORE_LABELS = {0:'N/A',1:'Beginning',2:'Developing',3:'Applying',4:'Mastery'};
-const BADGE_CLASS = ['b0','b1','b2','b3','b4'];
-const BADGE_SHORT = ['N/A','Beg','Dev','App','Mas'];
+function handleFile(input){file=input.files[0];document.getElementById('file-name').textContent=file?'Selected: '+file.name:'';document.getElementById('run-btn').disabled=!file;}
 
-function handleFile(input) {
-  selectedFile = input.files[0];
-  document.getElementById('file-name').textContent = selectedFile ? selectedFile.name : '';
-  document.getElementById('run-btn').disabled = !selectedFile;
+async function runEval(){
+  if(!file)return;
+  flagT=2.0;
+  const pw=document.getElementById('progress-wrap'),pb=document.getElementById('prog-bar'),
+    ps=document.getElementById('prog-status'),btn=document.getElementById('run-btn');
+  pw.style.display='block';btn.disabled=true;pb.style.width='10%';
+  ps.textContent='Uploading CSV...';
+  const fd=new FormData();fd.append('file',file);
+  try{
+    pb.style.width='20%';ps.textContent='Evaluating with Claude — this may take 1–3 minutes.';
+    let p=20;const t=setInterval(()=>{if(p<88){p+=1.5;pb.style.width=p+'%';}},1500);
+    const r=await fetch(`${API}/api/evaluate`,{method:'POST',body:fd});
+    clearInterval(t);
+    if(!r.ok)throw new Error('Server error: '+r.status);
+    const d=await r.json();
+    if(d.status!=='success')throw new Error(d.message||'Evaluation failed');
+    results=d.students;pb.style.width='100%';ps.textContent='Done. '+results.length+' students evaluated.';
+    document.getElementById('btn-csv').disabled=false;document.getElementById('btn-pdf').disabled=false;
+    setTimeout(()=>{showPage('overview');renderOv();},700);
+  }catch(e){pb.style.width='0%';ps.textContent='Error: '+e.message;btn.disabled=false;toast('Evaluation failed: '+e.message,'err');}
 }
 
-async function runEvaluation() {
-  if (!selectedFile) return;
-  flagThreshold = parseFloat(document.getElementById('cfg-flag').value);
+function sc(v){return'var(--muted)';}
+function bdg(s){const n=(!s&&s!==0)?0:Math.min(4,Math.max(0,s));return`<span class="bdg ${BC[n]}">${BS[n]}</span>`;}
+function flagged(st){const cu=st.comm_user,cc=st.comm_client;const a=(cu!==null&&cc!==null)?(cu+cc)/2:(cu??cc);return a!==null&&a!==undefined&&a<flagT;}
 
-  const pw = document.getElementById('progress-wrap');
-  const pb = document.getElementById('progress-bar');
-  const ps = document.getElementById('progress-status');
-  const btn = document.getElementById('run-btn');
-  pw.style.display = 'block';
-  btn.disabled = true;
-  pb.style.width = '10%';
-  ps.textContent = 'Uploading CSV to backend...';
-
-  const fd = new FormData();
-  fd.append('file', selectedFile);
-
-  try {
-    pb.style.width = '25%';
-    ps.textContent = 'Evaluating students with Claude... this may take 1-2 minutes.';
-
-    // Animate progress while waiting
-    let pct = 25;
-    const ticker = setInterval(() => {
-      if (pct < 85) { pct += 2; pb.style.width = pct + '%'; }
-    }, 2000);
-
-    const resp = await fetch(`${API}/api/evaluate`, { method:'POST', body:fd });
-    clearInterval(ticker);
-
-    if (!resp.ok) throw new Error(`Server error: ${resp.status}`);
-    const data = await resp.json();
-
-    if (data.status !== 'success') throw new Error(data.message || 'Evaluation failed');
-
-    results = data.students;
-    pb.style.width = '100%';
-    ps.textContent = `Done. ${results.length} students evaluated.`;
-
-    document.getElementById('btn-csv').disabled = false;
-    document.getElementById('btn-pdf').disabled = false;
-
-    setTimeout(() => {
-      showPage('overview');
-      renderOverview();
-    }, 600);
-
-  } catch(e) {
-    pb.style.width = '0%';
-    ps.textContent = 'Error: ' + e.message;
-    btn.disabled = false;
-    showToast('Evaluation failed: ' + e.message, true);
-  }
+function renderOv(){
+  const tot=results.length,comp=results.filter(s=>s.completed===1).length,fl=results.filter(flagged).length;
+  const cv=results.map(s=>s.comm_user).filter(v=>v!==null&&v!==undefined);
+  const avg=cv.length?(cv.reduce((a,b)=>a+b,0)/cv.length).toFixed(2):'N/A';
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total Students</div><div class="stat-value">${tot}</div><div class="stat-meta">Evaluated</div></div>
+    <div class="stat-card green"><div class="stat-label">Completed</div><div class="stat-value">${comp}</div><div class="stat-meta">Both sessions</div></div>
+    <div class="stat-card amber"><div class="stat-label">Avg User Comm</div><div class="stat-value">${avg}</div><div class="stat-meta">Score out of 4</div></div>
+    <div class="stat-card red"><div class="stat-label">Flagged</div><div class="stat-value">${fl}</div><div class="stat-meta">For review</div></div>`;
+  const sims=[...new Set(results.map(s=>s.simulation))].join(' and ');
+  document.getElementById('tbl-meta').textContent=sims+' · '+tot+' students';
+  document.getElementById('ov-empty').style.display='none';
+  document.getElementById('ov-content').style.display='block';
+  renderTbl(results);
 }
 
-function scoreColor(v) {
-  if (v === null || v === undefined) return 'var(--subtle)';
-  if (v >= 3.5) return 'var(--s4-text)';
-  if (v >= 2.5) return 'var(--s3-text)';
-  if (v >= 1.5) return 'var(--s2-text)';
-  return 'var(--s1-text)';
-}
-
-function badge(score) {
-  const s = (score === null || score === undefined) ? 0 : Math.min(4, Math.max(0, score));
-  return `<span class="badge ${BADGE_CLASS[s]}">${BADGE_SHORT[s]}</span>`;
-}
-
-function isFlagged(student) {
-  const cu = student.comm_user, cc = student.comm_client;
-  const avg = (cu !== null && cc !== null) ? (cu + cc) / 2 : (cu ?? cc);
-  return avg !== null && avg < flagThreshold;
-}
-
-function renderOverview() {
-  const total = results.length;
-  const completed = results.filter(s => s.completed === 1).length;
-  const flagged = results.filter(isFlagged).length;
-  const commVals = results.map(s => s.comm_user).filter(v => v !== null);
-  const avgComm = commVals.length ? (commVals.reduce((a,b) => a+b, 0) / commVals.length).toFixed(2) : 'N/A';
-
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total Students</div></div>
-    <div class="stat-card"><div class="stat-num">${completed}</div><div class="stat-label">Completed Both Sessions</div></div>
-    <div class="stat-card"><div class="stat-num">${avgComm}</div><div class="stat-label">Avg User Comm Score</div></div>
-    <div class="stat-card warn"><div class="stat-num">${flagged}</div><div class="stat-label">Flagged for Review</div></div>`;
-
-  const sims = [...new Set(results.map(s => s.simulation))].join(' and ');
-  document.getElementById('tbl-meta').textContent = `${sims} · ${total} students`;
-  document.getElementById('overview-empty').style.display = 'none';
-  document.getElementById('overview-content').style.display = 'block';
-
-  renderTable(results);
-}
-
-function renderTable(data) {
-  const inds = currentSession === 'user' ? USER_INDS : CLIENT_INDS;
-  const commKey = currentSession === 'user' ? 'comm_user' : 'comm_client';
-  const ctKey = currentSession === 'user' ? 'ct_user' : 'ct_client';
-  const suffix = currentSession === 'user' ? '_user' : '_client';
-
-  document.getElementById('tbl-head').innerHTML = `<tr>
-    <th>Student ID</th><th>Simulation</th><th>Completed</th>
-    ${inds.map(i => `<th title="${IND_DESC[i]||i}">${i.replace('_',' ')}</th>`).join('')}
-    <th>Comm</th><th>CT</th><th>Status</th>
-  </tr>`;
-
-  document.getElementById('tbl-body').innerHTML = data.map(s => {
-    const flagged = isFlagged(s);
-    const comm = s[commKey], ct = s[ctKey];
-    return `<tr onclick="openModal('${s.participant_id}')">
+function renderTbl(data){
+  const inds=sess==='user'?U_IND:C_IND,ck=sess==='user'?'comm_user':'comm_client',tk=sess==='user'?'ct_user':'ct_client',sfx=sess==='user'?'_user':'_client';
+  document.getElementById('tbl-head').innerHTML=`<tr><th>Student ID</th><th>Simulation</th><th>Completed</th>${inds.map(i=>`<th title="${DESC[i]||i}">${i.replace('_',' ')}</th>`).join('')}<th>Comm</th><th>CT</th><th>Status</th></tr>`;
+  document.getElementById('tbl-body').innerHTML=data.map(s=>{
+    const cm=s[ck],ct=s[tk],fl=flagged(s);
+    return`<tr onclick="openModal('${s.participant_id}')">
       <td class="id-cell">${s.participant_id}</td>
-      <td><span class="sim-tag">${s.simulation}</span></td>
-      <td class="${s.completed ? 'comp-yes' : 'comp-no'}">${s.completed ? 'Yes' : 'No'}</td>
-      ${inds.map(k => {
-        const sc = s[`${k}${suffix}_score`] ?? 0;
-        return `<td style="text-align:center">${badge(sc)}</td>`;
-      }).join('')}
-      <td class="score-cell" style="color:${scoreColor(comm)}">${comm ?? '—'}</td>
-      <td class="score-cell" style="color:${scoreColor(ct)}">${ct ?? '—'}</td>
-      <td>${flagged ? `<span class="status-flag">Flagged</span>` : s.completed === 0 ? `<span class="status-inc">Incomplete</span>` : `<span class="status-ok">Clear</span>`}</td>
-    </tr>`;
-  }).join('');
+      <td><span class="sim-pill">${s.simulation}</span></td>
+      <td class="${s.completed?'comp-y':'comp-n'}">${s.completed?'Yes':'No'}</td>
+      ${inds.map(k=>`<td style="text-align:center">${bdg(s[k+sfx+'_score'])}</td>`).join('')}
+      <td class="sc" style="color:${sc(cm)}">${cm??'—'}</td>
+      <td class="sc" style="color:${sc(ct)}">${ct??'—'}</td>
+      <td>${fl?`<span class="st-flag">Flagged</span>`:s.completed===0?`<span class="st-inc">Incomplete</span>`:`<span class="st-ok">Clear</span>`}</td>
+    </tr>`;}).join('');
 }
 
-function switchSession(sess, btn) {
-  currentSession = sess;
-  document.querySelectorAll('.sess-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTable(results);
-}
+function switchSess(s,btn){sess=s;document.querySelectorAll('.sess-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTbl(results);}
+function filterTbl(q){renderTbl(results.filter(s=>s.participant_id.toLowerCase().includes(q.toLowerCase())||s.simulation.toLowerCase().includes(q.toLowerCase())));}
 
-function filterTable(q) {
-  renderTable(results.filter(s =>
-    s.participant_id.toLowerCase().includes(q.toLowerCase()) ||
-    s.simulation.toLowerCase().includes(q.toLowerCase())
-  ));
-}
-
-function openModal(pid) {
-  const s = results.find(x => x.participant_id === pid);
-  if (!s) return;
-  document.getElementById('m-id').textContent = s.participant_id;
-  document.getElementById('m-sim').textContent = s.simulation.replace(/_/g, ' ');
-  document.getElementById('m-comp').innerHTML = s.completed
-    ? `<span class="comp-yes">Completed both sessions</span>`
-    : `<span class="comp-no">Session incomplete</span>`;
-
-  document.getElementById('m-stats').innerHTML = `
-    <div class="mini-stat"><div class="mini-stat-val" style="color:${scoreColor(s.comm_user)}">${s.comm_user ?? 'N/A'}</div><div class="mini-stat-label">User Comm</div></div>
-    <div class="mini-stat"><div class="mini-stat-val" style="color:${scoreColor(s.ct_user)}">${s.ct_user ?? 'N/A'}</div><div class="mini-stat-label">User CT</div></div>
-    <div class="mini-stat"><div class="mini-stat-val" style="color:${scoreColor(s.comm_client)}">${s.comm_client ?? 'N/A'}</div><div class="mini-stat-label">Client Comm</div></div>
-    <div class="mini-stat"><div class="mini-stat-val" style="color:${scoreColor(s.ct_client)}">${s.ct_client ?? 'N/A'}</div><div class="mini-stat-label">Client CT</div></div>`;
-
-  const detail = s._detail || {};
-
-  function renderIndSection(session, inds, suffix) {
-    const sess = detail[session];
-    if (!sess) return `<p style="font-size:12px;color:var(--subtle)">No ${session} session data.</p>`;
-    return inds.map(k => {
-      const item = sess.scores?.[k] || {};
-      const sc = item.score ?? 0;
-      const pct = (sc / 4) * 100;
-      const quotes = (item.quotes || []).map(q => `<div class="ind-quote">"${q}"</div>`).join('');
-      return `<div class="ind-row">
-        <div class="ind-top"><span class="ind-key">${k}</span>${badge(sc)}</div>
-        <div class="ind-desc">${IND_DESC[k] || k}</div>
-        <div class="ind-rationale">${item.rationale || 'No rationale available.'}</div>
-        ${quotes ? `<div class="ind-quotes">${quotes}</div>` : ''}
-        <div class="progress-track2"><div class="pf pf${sc}" style="width:${pct}%"></div></div>
-      </div>`;
-    }).join('');
-  }
-
-  document.getElementById('m-user-section').innerHTML = `
-    <div class="sec-title">User Session Indicators</div>
-    <div class="ind-list">${renderIndSection('user', USER_INDS, '_user')}</div>`;
-  document.getElementById('m-client-section').innerHTML = `
-    <div class="sec-title" style="margin-top:20px">Client Session Indicators</div>
-    <div class="ind-list">${renderIndSection('client', CLIENT_INDS, '_client')}</div>`;
-
+function openModal(pid){
+  const s=results.find(x=>x.participant_id===pid);if(!s)return;
+  document.getElementById('m-id').textContent=s.participant_id;
+  document.getElementById('m-sim').textContent=s.simulation.replace(/_/g,' ');
+  document.getElementById('m-comp').innerHTML=s.completed?`<span class="comp-y">Completed both sessions</span>`:`<span class="comp-n">Session incomplete</span>`;
+  document.getElementById('m-stats').innerHTML=`
+    <div class="m-stat"><div class="m-val" style="color:${sc(s.comm_user)}">${s.comm_user??'N/A'}</div><div class="m-lbl">User Comm</div></div>
+    <div class="m-stat"><div class="m-val" style="color:${sc(s.ct_user)}">${s.ct_user??'N/A'}</div><div class="m-lbl">User CT</div></div>
+    <div class="m-stat"><div class="m-val" style="color:${sc(s.comm_client)}">${s.comm_client??'N/A'}</div><div class="m-lbl">Client Comm</div></div>
+    <div class="m-stat"><div class="m-val" style="color:${sc(s.ct_client)}">${s.ct_client??'N/A'}</div><div class="m-lbl">Client CT</div></div>`;
+  const det=s._detail||{};
+  function sec(k,inds){const sd=det[k];if(!sd)return`<p style="font-size:12px;color:var(--subtle);padding:8px 0">No ${k} session data.</p>`;
+    return inds.map(i=>{const item=sd.scores?.[i]||{},n=item.score??0,segs=[1,2,3,4].map(x=>`<div class="lv-seg seg${x}${n>=x?' on':''}"></div>`).join(''),qs=(item.quotes||[]).slice(0,2).map(q=>`<div class="ind-q">"${q}"</div>`).join('');
+      return`<div class="ind-row"><div class="ind-top"><span class="ind-key">${i}</span>${bdg(n)}</div><div class="ind-desc">${DESC[i]||i}</div><div class="ind-rat">${item.rationale||'No rationale available.'}</div>${qs}<div class="lv-bar">${segs}</div></div>`;}).join('');}
+  document.getElementById('m-user').innerHTML=`<div class="sec-ttl">User Session Indicators</div>${sec('user',U_IND)}`;
+  document.getElementById('m-client').innerHTML=`<div class="sec-ttl">Client Session Indicators</div>${sec('client',C_IND)}`;
   document.getElementById('modal').classList.add('open');
 }
+function closeModal(){document.getElementById('modal').classList.remove('open');}
 
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-
-function renderSummary() {
-  if (!results.length) return;
-  document.getElementById('summary-empty').style.display = 'none';
-  document.getElementById('summary-content').style.display = 'block';
-
-  const total = results.length;
-  const flagged = results.filter(isFlagged).length;
-  const incomplete = results.filter(s => s.completed === 0).length;
-  const incIds = results.filter(s => s.completed === 0).map(s => s.participant_id).join(', ');
-
-  document.getElementById('insights-row').innerHTML = `
-    <div class="insight-card ${flagged/total > 0.5 ? 'warn' : 'info'}">
-      <h3>Flag Rate: ${Math.round(flagged/total*100)}%</h3>
-      <p>${flagged} of ${total} students are flagged (avg score below ${flagThreshold}). ${flagged/total > 0.5 ? 'Consider reviewing the flag threshold with Harry.' : 'Flag rate is within a reasonable range.'}</p>
-    </div>
-    <div class="insight-card ${incomplete === 0 ? 'good' : 'warn'}">
-      <h3>Completion: ${total - incomplete} of ${total}</h3>
-      <p>${incomplete === 0 ? 'All students completed both sessions.' : `${incomplete} incomplete session(s): ${incIds}.`}</p>
-    </div>
-    <div class="insight-card info">
-      <h3>Simulations</h3>
-      <p>${[...new Set(results.map(s => s.simulation))].join(', ')}. ${results.length} total evaluations processed.</p>
-    </div>`;
-
-  function chartFor(elId, inds, suffix) {
-    const el = document.getElementById(elId);
-    el.innerHTML = inds.map(ind => {
-      const vals = results.map(s => s[`${ind}${suffix}_score`]).filter(v => v && v > 0);
-      const avg = vals.length ? (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(2) : 0;
-      const pct = (avg / 4) * 100;
-      const col = avg >= 3.5 ? 'var(--s4-text)' : avg >= 2.5 ? 'var(--s3-text)' : avg >= 1.5 ? 'var(--s2-text)' : 'var(--s1-text)';
-      return `<div class="bar-row">
-        <div class="bar-label">${ind}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div>
-        <div class="bar-val" style="color:${col}">${avg}</div>
-      </div>`;
-    }).join('');
-  }
-  chartFor('chart-user', USER_INDS, '_user');
-  chartFor('chart-client', CLIENT_INDS, '_client');
+function renderSum(){
+  if(!results.length)return;
+  document.getElementById('sum-empty').style.display='none';document.getElementById('sum-content').style.display='block';
+  const tot=results.length,fl=results.filter(flagged).length,inc=results.filter(s=>s.completed===0).length;
+  const incIds=results.filter(s=>s.completed===0).map(s=>s.participant_id).join(', ');
+  document.getElementById('ins-grid').innerHTML=`
+    <div class="ins-card ${fl/tot>.5?'warn':'info'}"><h3>Flag Rate: ${Math.round(fl/tot*100)}%</h3><p>${fl} of ${tot} students flagged (avg below ${flagT}). ${fl/tot>.5?'Consider reviewing threshold.':'Rate within reasonable range.'}</p></div>
+    <div class="ins-card ${inc===0?'good':'warn'}"><h3>Completion: ${tot-inc} of ${tot}</h3><p>${inc===0?'All students completed both sessions.':`${inc} incomplete: ${incIds}.`}</p></div>
+    <div class="ins-card info"><h3>Simulations</h3><p>${[...new Set(results.map(s=>s.simulation))].join(', ')}. ${tot} total evaluations processed.</p></div>`;
+  function chartFor(el,inds,sfx){
+    document.getElementById(el).innerHTML=inds.map(ind=>{
+      const vs=results.map(s=>s[`${ind}${sfx}_score`]).filter(v=>v&&v>0);
+      const av=vs.length?(vs.reduce((a,b)=>a+b,0)/vs.length).toFixed(2):0;
+      const col='rgba(59,130,246,0.5)';
+      return`<div class="bar-row"><div class="bar-lbl">${ind}</div><div class="bar-track"><div class="bar-fill" style="width:${av/4*100}%;background:${col}"></div></div><div class="bar-val" style="color:var(--muted)">${av}</div></div>`;}).join('');}
+  chartFor('chart-user',U_IND,'_user');chartFor('chart-client',C_IND,'_client');
 }
 
-async function exportCSV() {
-  if (!results.length) { showToast('No data to export.', true); return; }
-  try {
-    const clean = results.map(({_detail, ...rest}) => rest);
-    const resp = await fetch(`${API}/api/export/csv`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({students: clean})
-    });
-    if (!resp.ok) throw new Error('Export failed');
-    const blob = await resp.blob();
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'rubricai_scores.csv';
-    a.click();
-    showToast('CSV exported successfully.');
-  } catch(e) { showToast('CSV export failed: ' + e.message, true); }
+async function sendChat(){
+  const inp=document.getElementById('chat-input');const msg=inp.value.trim();if(!msg)return;
+  inp.value='';addMsg('user',msg);chatHist.push({role:'user',content:msg});
+  const bbl=addMsg('assistant','...');
+  const sys=results.length
+    ?`You are an expert educational assessment assistant for RubricAI v2. Help instructors understand student performance.\n\nEvaluation data: ${JSON.stringify(results.map(s=>({id:s.participant_id,sim:s.simulation,completed:s.completed,comm_user:s.comm_user,ct_user:s.ct_user,comm_client:s.comm_client,ct_client:s.ct_client})))}\n\nScoring: 1=Beginning, 2=Developing, 3=Applying, 4=Mastery. Cite student IDs and scores where relevant.`
+    :`You are an expert educational assessment assistant for RubricAI v2. No evaluation data loaded yet. Answer questions about the rubric or platform. Rubric covers Communication and Critical Thinking on a 1–4 scale.`;
+  try{
+    const r=await fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys,messages:chatHist})});
+    const d=await r.json();if(d.status!=='success')throw new Error(d.message);
+    bbl.textContent=d.reply;chatHist.push({role:'assistant',content:d.reply});
+  }catch(e){bbl.textContent='Error: '+e.message;}
+}
+function addMsg(role,text){const w=document.getElementById('chat-msgs');const d=document.createElement('div');d.className=`chat-msg ${role}`;d.innerHTML=`<div class="avatar">${role==='user'?'You':'AI'}</div><div class="bubble">${text}</div>`;w.appendChild(d);w.scrollTop=w.scrollHeight;return d.querySelector('.bubble');}
+function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+function fillChat(t){document.getElementById('chat-input').value=t;}
+
+function renderRubric(){
+  document.getElementById('rubric-content').innerHTML=RD.map(c=>`
+    <div class="rubric-cluster">
+      <div class="cluster-head">
+        <div class="cluster-title">${c.cluster}</div>
+        <div class="cluster-meta">${c.session} · ${c.inds.length} indicator${c.inds.length>1?'s':''}</div>
+      </div>
+      ${c.inds.map(ind=>`
+        <div class="rubric-ind">
+          <div class="rind-header">
+            <span class="rind-id">${ind.id}</span>
+            <span class="rind-name">${ind.name}</span>
+          </div>
+          <div class="levels-grid">
+            ${['Beginning','Developing','Applying','Mastery'].map((l,i)=>`
+              <div class="level-box">
+                <div class="level-lbl"><span class="level-num">${i+1}</span>${l}</div>
+                <div class="level-txt">${ind.ls[i]}</div>
+              </div>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>`).join('');}
+
+async function exportCSV(){
+  if(!results.length){toast('No data to export.','err');return;}
+  try{const cl=results.map(({_detail,...r})=>r);const r=await fetch(`${API}/api/export/csv`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({students:cl})});if(!r.ok)throw new Error('Export failed');const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='rubricai_scores.csv';a.click();toast('CSV exported.','ok');}catch(e){toast('CSV export failed: '+e.message,'err');}
+}
+async function exportPDF(){
+  if(!results.length){toast('No data to export.','err');return;}
+  try{const cl=results.map(({_detail,...r})=>r);const r=await fetch(`${API}/api/export/pdf`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({students:cl})});if(!r.ok)throw new Error('Export failed');const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='rubricai_report.pdf';a.click();toast('PDF downloaded.','ok');}catch(e){toast('PDF export failed: '+e.message,'err');}
 }
 
-async function exportPDF() {
-  if (!results.length) { showToast('No data to export.', true); return; }
-  try {
-    const clean = results.map(({_detail, ...rest}) => rest);
-    const resp = await fetch(`${API}/api/export/pdf`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({students: clean})
-    });
-    if (!resp.ok) throw new Error('Export failed');
-    const blob = await resp.blob();
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'rubricai_report.pdf';
-    a.click();
-    showToast('PDF downloaded successfully.');
-  } catch(e) { showToast('PDF export failed: ' + e.message, true); }
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('nav-'+p)?.classList.add('active');
+  const T={landing:'Home',upload:'Upload and Evaluate',overview:'Class Overview',summary:'Summary and Charts',assistant:'AI Assistant',rubric:'Rubric Framework'};
+  const S={landing:'AI-powered student interview assessment',upload:'Upload a CSV file to begin evaluation',overview:results.length?results.length+' students evaluated':'No evaluation run yet',summary:results.length?'Performance insights and export':'No evaluation run yet',assistant:'Ask questions about student results or the rubric',rubric:'Full assessment rubric — Communication and Critical Thinking'};
+  document.getElementById('page-title').textContent=T[p]||p;
+  document.getElementById('page-sub').textContent=S[p]||'';
+  if(p==='summary')renderSum();
+  if(p==='rubric')renderRubric();
 }
 
-function showPage(p) {
-  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-  document.getElementById('page-' + p).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('nav-' + p)?.classList.add('active');
-  const titles = {upload:'Upload and Evaluate', overview:'Class Overview', summary:'Summary and Charts'};
-  const subs = {
-    upload: 'Upload a CSV file to begin evaluation',
-    overview: results.length ? `${results.length} students evaluated` : 'No evaluation run yet',
-    summary: results.length ? 'Performance insights and export' : 'No evaluation run yet'
-  };
-  document.getElementById('page-title').textContent = titles[p] || p;
-  document.getElementById('page-sub').textContent = subs[p] || '';
-  if (p === 'summary') renderSummary();
-}
-
-function showToast(msg, err = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (err ? ' err' : '');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
-}
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 </script>
 </body>
 </html>
