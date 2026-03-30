@@ -1,13 +1,13 @@
 import os
 import json
 import re
-from anthropic import Anthropic
+from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
-client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-# ── Indicators per session (based on output template) ─────────────────────────
+# ── Indicators per session ─────────────────────────────────────────────────────
 USER_INDICATORS = {
     "C1_I1": "Asks clear, open-ended questions",
     "C1_I2": "Uses follow-up questions to probe deeper into ideas or emotions",
@@ -39,7 +39,9 @@ COMM_CLIENT = ["C2_I1", "C2_I2", "C2_I3"]
 CT_CLIENT   = ["CT2_I1", "CT2_I2", "CT2_I3", "CT2_I4", "CT3_I1", "CT3_I2", "CT3_I4"]
 
 
-def load_rubric():
+def load_rubric(rubric_text=None):
+    if rubric_text:
+        return rubric_text
     for fname in ["rubric.md", "rubric.txt"]:
         path = os.path.join(os.path.dirname(__file__), fname)
         if os.path.exists(path):
@@ -57,12 +59,12 @@ def compute_average(scores_dict, keys):
 def evaluate_session(transcript, participant_id, session_type, duration=0, rubric_text=None):
     """
     Score ALL indicators for one session in a SINGLE API call.
-    temperature=0 ensures deterministic output — same input always returns same scores.
+    temperature=0 ensures deterministic output.
     """
     if not rubric_text:
         rubric_text = load_rubric()
     if not rubric_text:
-        return {"error": "rubric.md not found"}
+        return {"error": "Rubric not found"}
 
     indicators = USER_INDICATORS if session_type == "user" else CLIENT_INDICATORS
     keys = list(indicators.keys())
@@ -76,14 +78,13 @@ def evaluate_session(transcript, participant_id, session_type, duration=0, rubri
     if session_type == "user":
         c1i5_note = """
 SPECIAL RULE for C1_I5:
-Score ONLY the student's first [User] turn after the agent says 
+Score ONLY the student's first [User] turn after the agent says
 "You're about to begin the customer interview".
 Score 0 if the student never reached this point.
 """
 
     ind_list = "\n".join([f"- {k}: {v}" for k, v in indicators.items()])
 
-    # Build the expected JSON structure
     example_scores = {}
     for k in keys:
         example_scores[k] = {
@@ -93,7 +94,7 @@ Score 0 if the student never reached this point.
             "quotes": ["direct quote from [User] turn"]
         }
 
-    prompt = f"""You are an expert educational assessor evaluating a high school student in a micro-internship simulation.
+    prompt = f"""You are an expert educational assessor evaluating a student in a simulation.
 
 FULL RUBRIC:
 {rubric_text}
@@ -118,7 +119,7 @@ SCORING SCALE:
 
 CRITICAL RULES:
 - Score each indicator independently. Do not let one score influence another.
-- Base scores ONLY on observable behaviors in the transcript — not inferred intent.
+- Base scores ONLY on observable behaviors in the transcript, not inferred intent.
 - Be consistent — same transcript must always produce same scores.
 - For each indicator, find its specific criteria in the rubric and apply precisely.
 
@@ -140,14 +141,14 @@ For each indicator:
 - rationale: 2-3 sentences citing specific observable behaviors
 - quotes: 1-3 short direct quotes from [User] turns only. Empty array if score is 0."""
 
-    response = client.messages.create(
-        model="claude-sonnet-4-20250514",
+    response = client.chat.completions.create(
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
         max_tokens=4000,
         temperature=0,
         messages=[{"role": "user", "content": prompt}]
     )
 
-    raw = response.content[0].text.strip()
+    raw = response.choices[0].message.content.strip()
     raw = raw.replace("```json", "").replace("```", "").strip()
 
     try:
@@ -164,7 +165,6 @@ For each indicator:
         else:
             scores = {}
 
-    # Validate and normalise each indicator
     result = {}
     for k in keys:
         item = scores.get(k, {})
@@ -172,10 +172,10 @@ For each indicator:
         if sc not in [0, 1, 2, 3, 4]:
             sc = 0
         result[k] = {
-            "score":    sc,
-            "level":    SCORE_LABELS[sc],
+            "score":     sc,
+            "level":     SCORE_LABELS[sc],
             "rationale": item.get("rationale", "Could not parse response"),
-            "quotes":   item.get("quotes", []),
+            "quotes":    item.get("quotes", []),
         }
 
     return result
@@ -185,8 +185,7 @@ def evaluate_participant(participant_id, simulation, transcript_user,
                          transcript_client, duration_user=0,
                          duration_client=0, rubric_text=None):
     """Full evaluation for one participant — 2 API calls total."""
-    if not rubric_text:
-        rubric_text = load_rubric()
+    rubric = load_rubric(rubric_text)
 
     result = {"participant_id": participant_id, "simulation": simulation,
               "user": None, "client": None}
@@ -194,44 +193,23 @@ def evaluate_participant(participant_id, simulation, transcript_user,
     if transcript_user and len(transcript_user.strip()) > 100:
         user_scores = evaluate_session(
             transcript=transcript_user, participant_id=participant_id,
-            session_type="user", duration=duration_user, rubric_text=rubric_text
+            session_type="user", duration=duration_user, rubric_text=rubric
         )
         result["user"] = {
-            "scores":    user_scores,
-            "comm_avg":  compute_average(user_scores, COMM_USER),
-            "ct_avg":    compute_average(user_scores, CT_USER),
+            "scores":   user_scores,
+            "comm_avg": compute_average(user_scores, COMM_USER),
+            "ct_avg":   compute_average(user_scores, CT_USER),
         }
 
     if transcript_client and len(transcript_client.strip()) > 100:
         client_scores = evaluate_session(
             transcript=transcript_client, participant_id=participant_id,
-            session_type="client", duration=duration_client, rubric_text=rubric_text
+            session_type="client", duration=duration_client, rubric_text=rubric
         )
         result["client"] = {
-            "scores":    client_scores,
-            "comm_avg":  compute_average(client_scores, COMM_CLIENT),
-            "ct_avg":    compute_average(client_scores, CT_CLIENT),
+            "scores":   client_scores,
+            "comm_avg": compute_average(client_scores, COMM_CLIENT),
+            "ct_avg":   compute_average(client_scores, CT_CLIENT),
         }
 
     return result
-
-
-if __name__ == "__main__":
-    rubric = load_rubric()
-    if not rubric:
-        print("ERROR: rubric.md not found"); exit(1)
-
-    sample = """[Agent]: You're about to begin the customer interview.
-[User]: Hi, I'm Alex from the consulting team. I wanted to ask you about your experience at Midday Market. Can you tell me about your last visit?
-[Agent]: It was okay I guess, a bit confusing.
-[User]: When you say confusing, what specifically felt confusing to you?
-[Agent]: The menu was hard to read.
-[User]: What made it hard to read — was it the layout or the number of options?
-[Agent]: Too many options I think.
-[User]: That makes sense. How did that affect your overall decision to come back?
-[Agent]: I just haven't gone back."""
-
-    print("Testing full user session scoring (single API call)...")
-    scores = evaluate_session(sample, "TEST-001", "user", 600, rubric)
-    print(json.dumps(scores, indent=2))
-    print("\nDone — all indicators scored in one API call.")

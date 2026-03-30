@@ -1,5 +1,4 @@
-
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from evaluator import (
@@ -11,7 +10,7 @@ from pdf_exporter import generate_pdf
 import csv
 import io
 import json
-import anthropic
+from groq import Groq
 import os
 from dotenv import load_dotenv
 
@@ -26,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
 @app.get("/")
@@ -42,7 +41,8 @@ def root():
 def health():
     return {
         "status": "healthy",
-        "model": "claude-sonnet-4-20250514",
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "provider": "Groq",
         "temperature": 0,
         "user_indicators": len(USER_INDICATORS),
         "client_indicators": len(CLIENT_INDICATORS),
@@ -51,19 +51,20 @@ def health():
 
 
 @app.post("/api/evaluate")
-async def evaluate_csv(file: UploadFile = File(...)):
+async def evaluate_csv(
+    file: UploadFile = File(...),
+    rubric: UploadFile = File(None)
+):
     """
-    Accepts merged CSV with columns:
-    participant_id, simulation, transcript_user, transcript_client
-    Optional: duration_seconds_user, duration_seconds_client, completed_user, completed_client
-
-    Returns per-indicator scores matching the output template format.
+    Accepts:
+    - file: merged CSV with transcript_user and transcript_client columns
+    - rubric: optional rubric file upload (.md or .txt)
+      If not provided, falls back to rubric.md in the backend directory
     """
     try:
+        # Read transcript CSV
         contents = await file.read()
         text = contents.decode("utf-8")
-
-        # Handle BOM
         if text.startswith("\ufeff"):
             text = text[1:]
 
@@ -73,26 +74,32 @@ async def evaluate_csv(file: UploadFile = File(...)):
         if not rows:
             return {"status": "error", "message": "No valid rows found. Check participant_id column."}
 
-        # Validate required columns
         required = {"participant_id", "simulation", "transcript_user", "transcript_client"}
         missing = required - set(rows[0].keys())
         if missing:
             return {"status": "error", "message": f"Missing columns: {missing}"}
 
-        rubric_text = load_rubric()
+        # Load rubric — from upload if provided, else from disk
+        rubric_text = None
+        if rubric and rubric.filename:
+            rubric_contents = await rubric.read()
+            rubric_text = rubric_contents.decode("utf-8")
+        else:
+            rubric_text = load_rubric()
+
         if not rubric_text:
-            return {"status": "error", "message": "rubric.md not found in backend directory."}
+            return {"status": "error", "message": "Rubric not found. Please upload a rubric file or add rubric.md to the backend directory."}
 
         students = []
         for row in rows:
-            pid          = row["participant_id"].strip()
-            sim          = row.get("simulation", "unknown").strip()
-            tx_user      = row.get("transcript_user", "").strip()
-            tx_client    = row.get("transcript_client", "").strip()
-            dur_user     = int(row.get("duration_seconds_user", 0) or 0)
-            dur_client   = int(float(row.get("duration_seconds_client", 0) or 0))
-            completed    = row.get("completed_user", "").strip()
-            notes        = row.get("notes", "").strip()
+            pid        = row["participant_id"].strip()
+            sim        = row.get("simulation", "unknown").strip()
+            tx_user    = row.get("transcript_user", "").strip()
+            tx_client  = row.get("transcript_client", "").strip()
+            dur_user   = int(row.get("duration_seconds_user", 0) or 0)
+            dur_client = int(float(row.get("duration_seconds_client", 0) or 0))
+            completed  = row.get("completed_user", "").strip()
+            notes      = row.get("notes", "").strip()
 
             result = evaluate_participant(
                 participant_id    = pid,
@@ -104,8 +111,8 @@ async def evaluate_csv(file: UploadFile = File(...)):
                 rubric_text       = rubric_text,
             )
 
-            # Build flat output matching the score template format
             flat = {
+                "id":             pid,
                 "participant_id": pid,
                 "simulation":     sim,
                 "duration":       dur_user or dur_client,
@@ -113,7 +120,6 @@ async def evaluate_csv(file: UploadFile = File(...)):
                 "notes":          notes,
             }
 
-            # User session scores
             user_s = result.get("user")
             if user_s:
                 for key in USER_INDICATORS:
@@ -129,7 +135,6 @@ async def evaluate_csv(file: UploadFile = File(...)):
                 flat["comm_user"] = None
                 flat["ct_user"]   = None
 
-            # Client session scores
             client_s = result.get("client")
             if client_s:
                 for key in CLIENT_INDICATORS:
@@ -145,7 +150,6 @@ async def evaluate_csv(file: UploadFile = File(...)):
                 flat["comm_client"] = None
                 flat["ct_client"]   = None
 
-            # Store full detail for UI
             flat["_detail"] = result
             students.append(flat)
 
@@ -157,7 +161,6 @@ async def evaluate_csv(file: UploadFile = File(...)):
 
 @app.post("/api/evaluate/single")
 async def evaluate_single(data: dict):
-    """Evaluate one participant — useful for testing."""
     try:
         rubric_text = load_rubric()
         result = evaluate_participant(
@@ -176,13 +179,11 @@ async def evaluate_single(data: dict):
 
 @app.post("/api/export/csv")
 async def export_csv(data: dict):
-    """Export scores as CSV matching the output template format."""
     try:
         students = data.get("students", [])
         if not students:
             return {"status": "error", "message": "No students to export."}
 
-        # Build CSV
         fieldnames = [k for k in students[0].keys() if k != "_detail"]
         output = io.StringIO()
         writer = csv.DictWriter(output, fieldnames=fieldnames)
@@ -202,7 +203,6 @@ async def export_csv(data: dict):
 
 @app.post("/api/export/pdf")
 async def export_pdf(data: dict):
-    """Export scores as PDF."""
     try:
         students  = data.get("students", [])
         pdf_bytes = generate_pdf(students)
@@ -217,20 +217,18 @@ async def export_pdf(data: dict):
 
 @app.post("/api/chat")
 async def chat(data: dict):
-    """AI assistant for querying student results."""
     try:
-        system_prompt = data.get("system", "You are a helpful assistant for RubricAI.")
+        system_prompt = data.get("system", "You are a helpful assessment assistant.")
         messages      = data.get("messages", [])
         if not messages:
             return {"status": "error", "message": "No messages provided."}
 
-        response = client.messages.create(
-            model       = "claude-sonnet-4-20250514",
+        response = client.chat.completions.create(
+            model       = "meta-llama/llama-4-scout-17b-16e-instruct",
             max_tokens  = 1000,
             temperature = 0,
-            system      = system_prompt,
-            messages    = messages,
+            messages    = [{"role": "system", "content": system_prompt}] + messages,
         )
-        return {"status": "success", "reply": response.content[0].text}
+        return {"status": "success", "reply": response.choices[0].message.content}
     except Exception as e:
         return {"status": "error", "message": str(e)}
