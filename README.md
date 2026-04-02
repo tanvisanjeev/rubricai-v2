@@ -1,27 +1,39 @@
 # RubricAI v2
-
-AI-powered student interview assessment platform. Automatically scores student transcripts against a research-backed rubric across Communication and Critical Thinking indicators.
-
----
-
-## Overview
-
-RubricAI v2 takes merged session CSV files containing student interview transcripts and returns structured scores for every indicator — with rationale and direct quotes from the transcript as evidence.
-
-- 17 indicators scored across Communication and Critical Thinking
-- 2 API calls per student — one for user interview session, one for client presentation
-- Temperature 0 — fully deterministic, same transcript always produces same scores
-- Output matches the score template format exactly
-- No hardcoded data — all results come from live API evaluation
+### AI-Powered Student Interview Assessment Tool
+Built at Northeastern University — CPS Learn Lab
 
 ---
 
-## Stack
+## What Is This?
 
-- **Backend:** Python, FastAPI
-- **AI:** Anthropic API
-- **Frontend:** HTML, CSS, vanilla JavaScript
-- **PDF Export:** ReportLab
+RubricAI v2 is an AI-powered tool that automatically evaluates student interview transcripts against a rubric. Instructors upload a CSV of transcripts and a rubric file, and the tool scores every student across Communication and Critical Thinking indicators — in minutes, consistently, and at scale.
+
+What normally takes an instructor hours to evaluate manually is completed in under 3 minutes for a full class.
+
+---
+
+## Features
+
+- **Dual file upload** — upload transcript CSV and rubric file together
+- **AI scoring** — scores every student across 17 indicators using Claude API
+- **Score colors by level** — Red (Beginning), Orange (Developing), Yellow (Applying), Green (Mastery)
+- **Class Overview** — full table of all students and scores with search and filter
+- **Summary and Charts** — KPI cards, bar charts by indicator, pie chart for completion status
+- **Rubric Framework** — fully expandable accordion with complete level descriptors word for word
+- **AI Assistant** — ask questions about student results or the rubric in natural language
+- **Export** — download results as CSV or PDF report
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | HTML, CSS, Vanilla JavaScript |
+| Backend | Python, FastAPI |
+| AI Model | Claude (Anthropic API) |
+| Server | Uvicorn |
+| Data | CSV upload, Markdown rubric |
 
 ---
 
@@ -30,160 +42,132 @@ RubricAI v2 takes merged session CSV files containing student interview transcri
 ```
 rubricai-v2/
 ├── backend/
-│   ├── main.py           # FastAPI endpoints
-│   ├── evaluator.py      # Core scoring logic and prompt engineering
-│   ├── pdf_exporter.py   # PDF report generation
-│   ├── rubric.md         # Full rubric — edit this to update scoring criteria
-│   └── .env              # API key (not committed)
+│   ├── main.py          # FastAPI server, API endpoints
+│   ├── evaluator.py     # AI scoring logic
+│   ├── rubric.md        # Default rubric file (gets replaced on upload)
+│   ├── .env             # API keys (not committed to GitHub)
+│   └── requirements.txt
 ├── frontend/
-│   └── index.html        # Full single-page application
-└── README.md
+│   └── index.html       # Full frontend — single file
+└── data/
+    └── merged_sessions_nola.csv   # Sample dataset
 ```
 
 ---
 
-## Setup
+## Setup and Running Locally
 
-**1. Clone the repo**
+### Prerequisites
+- Python 3.9+
+- An Anthropic API key — get one at https://console.anthropic.com
+
+### Step 1 — Clone the repo
 ```bash
 git clone https://github.com/tanvisanjeev/rubricai-v2.git
 cd rubricai-v2
 ```
 
-**2. Backend setup**
+### Step 2 — Set up the backend
 ```bash
 cd backend
 python3 -m venv venv
 source venv/bin/activate
-pip install fastapi uvicorn anthropic python-dotenv reportlab
+pip install -r requirements.txt
 ```
 
-**3. Add your API key**
+### Step 3 — Add your API key
 ```bash
-echo "ANTHROPIC_API_KEY=your_key_here" > .env
+nano .env
 ```
+Add this line:
+```
+ANTHROPIC_API_KEY=your_key_here
+```
+Save with Ctrl+O → Enter → Ctrl+X
 
-**4. Start the backend**
+### Step 4 — Start the backend
 ```bash
 uvicorn main:app --port 8000
 ```
 
-**5. Start the frontend**
+### Step 5 — Start the frontend (new terminal)
 ```bash
-cd ../frontend
+cd ~/rubricai-v2/frontend
 python3 -m http.server 8080
 ```
 
-**6. Open in browser**
+### Step 6 — Open in browser
 ```
 http://localhost:8080/index.html
 ```
 
 ---
 
-## How to Use
+## How to Run an Evaluation
 
-1. Prepare your merged sessions CSV with columns: `participant_id`, `simulation`, `transcript_user`, `transcript_client`
-2. Open the platform and go to Upload and Evaluate
-3. Select your CSV file and click Run Evaluation
-4. Review results in Class Overview and Summary and Charts
-5. Export as CSV or PDF
-6. Use the AI Assistant to ask questions about the results
+1. Click **Upload and Evaluate** in the sidebar
+2. Upload your transcript CSV in Step 1
+3. Upload your rubric file in Step 2 (optional — uses default rubric if not provided)
+4. Click **Run Evaluation**
+5. Results appear automatically in Class Overview when done
 
 ---
 
-## Input Format
+## CSV Format
 
-The platform expects a merged CSV file with the following required columns:
+Your transcript CSV should have these columns:
 
 | Column | Description |
-|--------|-------------|
-| `participant_id` | Unique student identifier |
-| `simulation` | Simulation name |
-| `transcript_user` | Full user interview session transcript |
-| `transcript_client` | Full client presentation session transcript |
-| `completed_user` | Session completion status (Complete / Incomplete) |
-| `duration_seconds_user` | Session duration in seconds |
-| `duration_seconds_client` | Session duration in seconds |
+|---|---|
+| participant_id | Unique student ID |
+| simulation | Simulation name |
+| completed_user | Complete or Incomplete |
+| transcript_user | Full user session transcript text |
+| transcript_client | Full client session transcript text |
+| duration_seconds_user | Duration of user session |
+| duration_seconds_client | Duration of client session |
 
 ---
 
-## Output Format
+## Scoring System
 
-CSV export matches the score template format:
+| Score | Level | Color |
+|---|---|---|
+| 1 | Beginning | 🔴 Red |
+| 2 | Developing | 🟠 Orange |
+| 3 | Applying | 🟡 Yellow |
+| 4 | Mastery | 🟢 Green |
 
-| Column | Description |
-|--------|-------------|
-| `id` | Participant ID |
-| `simulation` | Simulation name |
-| `C1_I1_user_score` | Score 0–4 |
-| `C1_I1_user_level` | N/A / Beginning / Developing / Applying / Mastery |
-| `comm_user` | Average communication score — user session |
-| `ct_user` | Average critical thinking score — user session |
-| ... | Same pattern for all 17 indicators |
+Students scoring below 2.0 average are flagged for instructor review.
 
 ---
-
-## Indicators Scored
-
-**User Interview Session**
-- C1_I1 — Asks clear, open-ended questions
-- C1_I2 — Uses follow-up questions to probe deeper
-- C1_I3 — Demonstrates active listening
-- C1_I5 — Introduces self and purpose professionally
-- C1_I6 — Builds rapport through tone and curiosity
-- CT1_I1 — Asks targeted questions to explore the client problem
-- CT1_I3 — Evaluates relevance of information
-
-**Client Presentation Session**
-- C2_I1 — Organizes ideas logically
-- C2_I2 — Connects claims to evidence
-- C2_I3 — Uses clear, concise, professional tone
-- CT2_I1 — Identifies relationships across data points
-- CT2_I2 — Recognizes patterns, themes, and root causes
-- CT2_I3 — Synthesizes evidence into insights
-- CT2_I4 — Organizes insights with logical structure
-- CT3_I1 — Clearly frames the decision or direction
-- CT3_I2 — Connects recommendations to evidence
-- CT3_I4 — Provides a logical, feasible recommendation
-
----
-
-## Updating the Rubric
-
-The rubric is stored in `backend/rubric.md`. To update scoring criteria:
-
-```bash
-nano ~/rubricai-v2/backend/rubric.md
-```
-
-Save the file. The next evaluation run will automatically use the updated rubric. No code changes or server restart required.
-
----
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/evaluate` | Evaluate a CSV file |
-| POST | `/api/evaluate/single` | Evaluate a single participant |
-| POST | `/api/export/csv` | Export results as CSV |
-| POST | `/api/export/pdf` | Export results as PDF |
-| POST | `/api/chat` | AI assistant query |
-| GET | `/api/health` | Health check |
 
 ---
 
 ## Roadmap
 
-- Professional Agency indicators
-- Parallel processing for faster evaluation
-- Manual scoring and inter-rater reliability comparison
-- Result caching to avoid re-evaluating the same data
-- User authentication
-- Cloud deployment
-- Human coder integration for validation
+- [x] Dual file upload — CSV and rubric
+- [x] AI scoring with Claude
+- [x] Score colors by level
+- [x] Expandable rubric accordion with full level descriptors
+- [x] KPI cards, bar charts, pie chart
+- [x] Export CSV and PDF
+- [ ] Human vs AI score comparison tab
+- [ ] Rubric chunking — send only relevant indicator per API call
+- [ ] Persistent results storage across sessions
+- [ ] Multi-rubric support for different courses
+- [ ] Institution login and multi-cohort management
 
 ---
 
-Built for CPS LEARN Lab · Northeastern University
+## Built By
+
+Tanvi Kadam
+Northeastern University — CPS Learn Lab
+Active development: March–May 2026
+
+---
+
+## License
+
+MIT License — free to use, modify, and distribute with attribution.
