@@ -1,11 +1,11 @@
 import os
 import json
 import re
-from groq import Groq
+from anthropic import Anthropic
 from dotenv import load_dotenv
 
 load_dotenv()
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 # ── Indicators per session ─────────────────────────────────────────────────────
 USER_INDICATORS = {
@@ -57,10 +57,6 @@ def compute_average(scores_dict, keys):
 
 
 def evaluate_session(transcript, participant_id, session_type, duration=0, rubric_text=None):
-    """
-    Score ALL indicators for one session in a SINGLE API call.
-    temperature=0 ensures deterministic output.
-    """
     if not rubric_text:
         rubric_text = load_rubric()
     if not rubric_text:
@@ -141,14 +137,14 @@ For each indicator:
 - rationale: 2-3 sentences citing specific observable behaviors
 - quotes: 1-3 short direct quotes from [User] turns only. Empty array if score is 0."""
 
-    response = client.chat.completions.create(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
+    response = client.messages.create(
+        model="claude-sonnet-4-20250514",
         max_tokens=4000,
         temperature=0,
         messages=[{"role": "user", "content": prompt}]
     )
 
-    raw = response.choices[0].message.content.strip()
+    raw = response.content[0].text.strip()
     raw = raw.replace("```json", "").replace("```", "").strip()
 
     try:
@@ -184,7 +180,6 @@ For each indicator:
 def evaluate_participant(participant_id, simulation, transcript_user,
                          transcript_client, duration_user=0,
                          duration_client=0, rubric_text=None):
-    """Full evaluation for one participant — 2 API calls total."""
     rubric = load_rubric(rubric_text)
 
     result = {"participant_id": participant_id, "simulation": simulation,

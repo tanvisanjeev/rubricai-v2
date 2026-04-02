@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from evaluator import (
@@ -10,11 +10,13 @@ from pdf_exporter import generate_pdf
 import csv
 import io
 import json
-from groq import Groq
+import google.generativeai as genai
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+chat_model = genai.GenerativeModel("gemini-2.5-flash-lite")
 
 app = FastAPI(title="RubricAI API", version="2.0")
 
@@ -24,8 +26,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
 @app.get("/")
@@ -41,8 +41,8 @@ def root():
 def health():
     return {
         "status": "healthy",
-        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
-        "provider": "Groq",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "Google Gemini",
         "temperature": 0,
         "user_indicators": len(USER_INDICATORS),
         "client_indicators": len(CLIENT_INDICATORS),
@@ -55,14 +55,7 @@ async def evaluate_csv(
     file: UploadFile = File(...),
     rubric: UploadFile = File(None)
 ):
-    """
-    Accepts:
-    - file: merged CSV with transcript_user and transcript_client columns
-    - rubric: optional rubric file upload (.md or .txt)
-      If not provided, falls back to rubric.md in the backend directory
-    """
     try:
-        # Read transcript CSV
         contents = await file.read()
         text = contents.decode("utf-8")
         if text.startswith("\ufeff"):
@@ -79,11 +72,13 @@ async def evaluate_csv(
         if missing:
             return {"status": "error", "message": f"Missing columns: {missing}"}
 
-        # Load rubric — from upload if provided, else from disk
-        rubric_text = None
+        # Load rubric — if uploaded save to disk once, then all calls read from disk
         if rubric and rubric.filename:
             rubric_contents = await rubric.read()
             rubric_text = rubric_contents.decode("utf-8")
+            rubric_path = os.path.join(os.path.dirname(__file__), "rubric.md")
+            with open(rubric_path, "w") as f:
+                f.write(rubric_text)
         else:
             rubric_text = load_rubric()
 
@@ -223,12 +218,16 @@ async def chat(data: dict):
         if not messages:
             return {"status": "error", "message": "No messages provided."}
 
-        response = client.chat.completions.create(
-            model       = "meta-llama/llama-4-scout-17b-16e-instruct",
-            max_tokens  = 1000,
-            temperature = 0,
-            messages    = [{"role": "system", "content": system_prompt}] + messages,
+        last_message = messages[-1]["content"]
+        full_prompt  = f"{system_prompt}\n\n{last_message}"
+
+        response = chat_model.generate_content(
+            full_prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0,
+                max_output_tokens=1000,
+            )
         )
-        return {"status": "success", "reply": response.choices[0].message.content}
+        return {"status": "success", "reply": response.text}
     except Exception as e:
         return {"status": "error", "message": str(e)}

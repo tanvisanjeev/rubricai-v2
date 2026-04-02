@@ -152,24 +152,72 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
 .seg4.on{background:var(--green);}
 
 /* SUMMARY */
-.ins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
-.ins-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;border-left:3px solid var(--border2);}
-.ins-card h3{font-size:13px;font-weight:700;margin-bottom:5px;}
-.ins-card p{font-size:12px;color:var(--muted);line-height:1.6;}
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;}
+.kpi-val{font-size:36px;font-weight:800;color:var(--accent);letter-spacing:-1px;margin-bottom:4px;}
+.kpi-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);}
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:22px;}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;}
 .chart-ttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:16px;}
-.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
-.bar-lbl{font-size:10px;color:var(--muted);width:62px;flex-shrink:0;}
-.bar-track{flex:1;height:7px;background:var(--surface2);border-radius:3px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:3px;transition:width .5s ease;}
-.bar-val{font-size:11px;font-weight:700;width:28px;text-align:right;}
+
+/* VERTICAL BAR CHART */
+.vbar-wrap{display:flex;align-items:flex-end;gap:5px;height:150px;padding-bottom:30px;position:relative;margin-top:10px;}
+.vbar-wrap::after{content:'';position:absolute;bottom:30px;left:0;right:0;height:1px;background:var(--border);}
+.vbar-col{display:flex;flex-direction:column;align-items:center;flex:1;position:relative;}
+.vbar{width:100%;border-radius:4px 4px 0 0;transition:height .5s ease;min-height:3px;cursor:pointer;}
+.vbar:hover{opacity:.75;}
+.vbar-val{font-size:9px;font-weight:700;color:var(--text);position:absolute;top:-16px;left:50%;transform:translateX(-50%);white-space:nowrap;}
+.vbar-lbl{font-size:8px;color:var(--subtle);position:absolute;bottom:-26px;left:50%;transform:translateX(-50%) rotate(-35deg);white-space:nowrap;transform-origin:top center;}
+
+/* PIE CHART */
+.pie-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;}
+.pie-svg{width:140px;height:140px;margin-bottom:16px;}
+.pie-legend{display:flex;flex-direction:column;gap:6px;width:100%;}
+.pie-legend-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);}
+.pie-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+/* HEATMAP */
+.heatmap-wrap{overflow-x:auto;}
+.heatmap-table{border-collapse:collapse;font-size:10px;}
+.heatmap-table th{padding:4px 6px;text-align:left;color:var(--subtle);font-weight:600;font-size:9px;white-space:nowrap;}
+.heatmap-table th.ind-hdr{text-align:center;transform:rotate(-35deg);transform-origin:bottom center;height:52px;vertical-align:bottom;padding-bottom:4px;}
+.heatmap-table td{padding:2px;text-align:center;}
+.heatmap-table td.sid{text-align:left;padding:3px 8px;font-family:monospace;font-size:9px;color:var(--accent);white-space:nowrap;}
+.hm-cell{width:24px;height:20px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;}
+.hm0{background:rgba(74,101,128,.2);color:var(--subtle);}
+.hm1{background:rgba(239,68,68,.25);color:#fca5a5;}
+.hm2{background:rgba(249,115,22,.25);color:#fdba74;}
+.hm3{background:rgba(245,158,11,.25);color:#fcd34d;}
+.hm4{background:rgba(16,185,129,.25);color:#6ee7b7;}
+
 .exp-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .exp-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .15s;}
 .exp-card:hover{border-color:var(--accent);background:var(--accent-glow);}
 .exp-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-bottom:8px;}
 .exp-card h4{font-size:13px;font-weight:700;margin-bottom:4px;}
 .exp-card p{font-size:12px;color:var(--muted);}
+
+/* RUBRIC ACCORDION */
+.rubric-cluster{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden;}
+.cluster-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2);}
+.cluster-title{font-size:14px;font-weight:700;color:var(--text);}
+.cluster-meta{font-size:11px;color:var(--muted);background:var(--accent-glow);border:1px solid rgba(59,130,246,.15);padding:3px 10px;border-radius:20px;}
+.rubric-ind{border-bottom:1px solid var(--border);}
+.rubric-ind:last-child{border-bottom:none;}
+.rubric-ind-header{padding:14px 22px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .15s;}
+.rubric-ind-header:hover{background:var(--accent-glow);}
+.rind-header{display:flex;align-items:center;gap:10px;}
+.rind-id{font-size:10px;font-weight:700;background:var(--surface2);color:var(--accent);padding:3px 8px;border-radius:4px;border:1px solid var(--border);font-family:monospace;flex-shrink:0;}
+.rind-name{font-size:13px;font-weight:600;color:var(--text);}
+.rind-toggle{font-size:12px;color:var(--subtle);transition:transform .2s;}
+.rind-toggle.open{transform:rotate(180deg);}
+.rubric-ind-body{display:none;padding:0 22px 16px;background:var(--surface2);}
+.rubric-ind-body.open{display:block;}
+.levels-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;}
+.level-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.level-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.level-num{display:inline-block;width:18px;height:18px;border-radius:4px;background:var(--accent-glow);color:var(--accent);font-size:10px;font-weight:800;text-align:center;line-height:18px;margin-right:5px;border:1px solid rgba(59,130,246,.2);}
+.level-txt{font-size:11px;color:var(--muted);line-height:1.7;}
 
 /* LANDING */
 .landing-hero{text-align:center;padding:60px 32px 40px;max-width:700px;margin:0 auto;}
@@ -440,10 +488,23 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
         <button class="btn" onclick="showPage('upload')">Go to Upload</button>
       </div>
       <div id="sum-content" style="display:none">
-        <div class="ins-grid" id="ins-grid"></div>
+        <div class="kpi-grid" id="kpi-grid"></div>
         <div class="charts-row">
-          <div class="chart-card"><div class="chart-ttl">Avg Score — User Session</div><div id="chart-user"></div></div>
-          <div class="chart-card"><div class="chart-ttl">Avg Score — Client Session</div><div id="chart-client"></div></div>
+          <div class="chart-card">
+            <div class="chart-ttl">Avg Score by Indicator — User Session</div>
+            <div id="chart-user" style="position:relative"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-ttl">Completion Status</div>
+            <div class="pie-wrap">
+              <svg class="pie-svg" id="pie-chart" viewBox="0 0 140 140"></svg>
+              <div class="pie-legend" id="pie-legend"></div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-card" style="margin-bottom:22px;">
+          <div class="chart-ttl">Avg Score by Indicator — Client Session</div>
+          <div id="chart-client" style="position:relative"></div>
         </div>
         <div class="exp-row">
           <div class="exp-card" onclick="exportCSV()">
@@ -541,32 +602,117 @@ const BC=['b0','b1','b2','b3','b4'];
 const BS=['N/A','Beg','Dev','App','Mas'];
 
 const RD=[
-  {cluster:'Communication — Cluster 1: Interview',session:'User Session',inds:[
-    {id:'C1_I1',name:'Asks clear, open-ended questions',ls:['0–1 open-ended questions. Vague or leading phrasing.','2–3 questions. Sometimes conflates topics. Not strategically phrased.','4–5 questions. Clearly phrased, one topic at a time.','6+ questions. Strategic phrasing. Invites storytelling.']},
-    {id:'C1_I2',name:'Uses follow-up questions to probe deeper',ls:['0–20% follow-ups. Misses emotional cues.','21–45% follow-ups. Generic, 1-level probing.','46–65% follow-ups. References interviewee words. 2-level probing.','65%+ follow-ups. Names what they probe. 3+ level probing.']},
-    {id:'C1_I3',name:'Demonstrates active listening',ls:['Never paraphrases. Interrupts 3+ times.','1–2 behaviors. Occasional inaccurate paraphrase.','3–4 behaviors. Accurate paraphrasing. Clarifying questions.','5+ behaviors. Interpretive paraphrasing. Thematic summaries.']},
-    {id:'C1_I5',name:'Introduces self and purpose professionally',ls:['Introduction absent or incomplete.','Has name/role/purpose but lacks relevance framing.','Clear logical introduction. Purpose linked to context.','Concise and comprehensive. Sets expectations. Explains value.']},
-    {id:'C1_I6',name:'Builds rapport through tone, curiosity, responsiveness',ls:['0 rapport behaviors. Transactional.','1–2 behaviors. Generic acknowledgments.','3–4 behaviors. Specific validation. Acknowledges emotion.','5+ behaviors. Integrates stakeholder language. Validates expertise.']}
+  {cluster:'Communication — Cluster 1: Interview Communication',session:'User Session',inds:[
+    {id:'C1_I1',name:'Asks clear, open-ended questions',ls:[
+      'Asks 0–1 open-ended questions per 10-minute segment. Questions are vague or confusing (interviewee asks for clarification ≥3 times). Exhibits 3+ of: phrasing unclear or leading ("Don\'t you think that...?"); questions conflate multiple topics; questions NOT strategically phrased to elicit rich responses; questions do NOT invite storytelling rather than reporting.',
+      'Asks 2–3 open-ended questions per 10-minute segment. Questions sometimes vague or confusing (interviewee asks for clarification 2–3 times). Phrasing clear, no leading phrases. Exhibits all of: questions sometimes conflate multiple topics; questions NOT strategically phrased; questions do NOT invite storytelling rather than reporting.',
+      'Asks 4–5 open-ended questions per 10-minute segment (e.g., "Can you tell me about...?", "What was your experience with...?"). Questions clearly phrased, minimal clarification needed (1–2 requests per 10 min). No leading phrases. Questions focus on one topic at a time. Exhibits all of: questions NOT strategically phrased; questions do NOT invite storytelling rather than reporting.',
+      'Asks 6+ open-ended questions per 10-minute segment. Clearly phrased (<1 clarification request per 10 min). No leading language. One topic at a time. Demonstrates strategic phrasing 3–5 times per interview ("Walk me through...", "Help me understand...", "What stood out to you about...?"). Questions invite storytelling 2–4 times per interview ("Tell me about a time when..." vs. "What are your thoughts on...?").'
+    ]},
+    {id:'C1_I2',name:'Uses follow-up questions to probe deeper into ideas or emotions',ls:[
+      'Asks 0–20% follow-up questions (relative to total questions). Identifies and probes 0–25% of key opportunities including: emotional words (frustration, excitement), contradictions between statements, vague terms ("things," "stuff"), or hedging language ("kind of," "sort of"). When interviewee provides surface answer, moves to next question without probing. No follow-up on follow-up response.',
+      'Asks 21–45% follow-up questions. Identifies and probes 26–50% of key opportunities including emotional words, contradictions, vague terms, or hedging language. Follow-ups are generic without referencing specific content. Pursues depth through 1-level probing only (asks follow-up to initial response, but does not follow up on the follow-up).',
+      'Asks 46–65% follow-up questions. Identifies and probes 51–70% of key opportunities. Follow-ups directly reference interviewee\'s statements (e.g., "You mentioned \'challenging\'—what specifically was challenging about it?"). Follow-ups extend beyond initial response. Pursues depth through 2-level probing (follows up on follow-up response).',
+      'Asks 65%+ follow-up questions. Identifies and probes ≥70% of opportunities. Explicitly names what they\'re probing (e.g., "I\'m curious about the frustration you mentioned—tell me more about that"). Pursues depth through 3+ level probing until reaching concrete, specific information. Uses multiple probe types: emotion probes ("What was that like for you?"), example probes ("Can you give me a specific instance?"), contrast probes ("How is this different from...?"), and assumption probes ("What makes you think that?").'
+    ]},
+    {id:'C1_I3',name:'Demonstrates active listening (paraphrasing, clarifying, summarizing)',ls:[
+      'All of the following are true: Student never restates, paraphrases, or summarizes anything the interviewee said. Student never asks a question that references something the interviewee just said. Student moves to a new topic immediately after each interviewee response without any acknowledgment. Student interrupts the interviewee 3 or more times.',
+      'At least 2 of the following are present: Does not interrupt (0–1 interruptions). Pauses after interviewee responses before asking the next question. Uses brief verbal acknowledgments that reference what was just said (e.g., "I see, so the menu was the issue" or "right, the convenience factor"). Mirrors the interviewee\'s tone — if interviewee expresses frustration, student acknowledges it ("that sounds frustrating") rather than moving on.',
+      'All of the following are true: Does not interrupt (0–1 interruptions). Pauses after responses. Uses verbal acknowledgments referencing what was just said. Mirrors interviewee\'s tone. PLUS at least 1 of: Pattern-naming — explicitly names a theme noticed across multiple responses (must reference at least two prior statements). OR Deepening clarifying question — asks a question that shows partial understanding and checks it (e.g., "Help me make sure I understand — are you saying the menu has too many items, or that the items aren\'t labeled clearly enough?").',
+      'All of the following are true: Does not interrupt (0–1 interruptions). Pauses after responses. Uses verbal acknowledgments. Mirrors tone. Names at least one pattern across multiple responses (must reference at least two prior statements). Asks at least one deepening clarifying question. PLUS at least 1 of: Interpretive paraphrase — restates what was said AND adds own interpretation (e.g., "It sounds like the core issue is that you don\'t feel confident you\'re making the right choice, which makes the whole experience feel less satisfying"). OR Thematic summary — groups multiple things interviewee said into named themes and explains how they connect (must cover at least 2 distinct themes).'
+    ]},
+    {id:'C1_I5',name:'Introduces self and purpose professionally',ls:[
+      'Introduction is absent, incomplete, or unclear. Omits 2 or more essential elements (name, role, purpose). Listener cannot determine why the interaction is occurring, what the speaker\'s role is, or what will happen next.',
+      'Introduction includes name, role, and purpose, but lacks organization or relevance framing. Presents information as disconnected facts (e.g., "I\'m Sarah, I work on Project X, we\'re doing interviews") without explaining why this matters to the listener or how it connects to their context.',
+      'Clearly introduces self, role, and purpose in a logically ordered sequence. Purpose is explicitly linked to the interaction or stakeholder context.',
+      'Introduction is concise (typically <45 seconds) yet comprehensive. Includes all Level 3 elements plus one or more of: establishes credibility (relevant experience, credentials, or connection to topic); sets expectations for the interaction (e.g., "This will take about 20 minutes, I\'ll ask about X and Y..."); explains value of stakeholder\'s participation (e.g., "Your insights will directly inform our recommendations"); frames purpose strategically to engage listener and clarify value of their participation.'
+    ]},
+    {id:'C1_I6',name:'Builds rapport with stakeholders through tone, curiosity, and responsiveness',ls:[
+      'Demonstrates 0 rapport-building behaviors per 10-minute segment. Interaction is transactional or disengaged. Provides minimal verbal acknowledgment (no "mm-hmm," "I see," "thank you," or validation). Does not reference or build on stakeholder\'s prior statements. Does not respond to emotional cues. Long silences after stakeholder responses (≥5 seconds before next question).',
+      'Demonstrates 1–2 rapport-building behaviors per 10-minute segment. Uses basic verbal acknowledgments ("I see," "okay," "thank you"). Occasionally references stakeholder\'s prior statements. Acknowledgments are generic and do not validate or build on specific content ("That\'s interesting" without specifying what). Minimal emotional responsiveness.',
+      'Demonstrates 3–4 rapport-building behaviors per 10-minute segment. Provides specific verbal validation ("That\'s a great point about X"). References stakeholder\'s prior statements with specificity ("Earlier you mentioned Y, and now you\'re saying Z—how do these connect?"). Acknowledges emotional content. Uses verbal encouragers consistently ("mm-hmm," "tell me more," "I\'m curious about that"). Observable: stakeholder provides progressively longer responses (final 3 responses ≥20% longer than first 3).',
+      'Demonstrates 5+ rapport-building behaviors per 10-minute segment with strategic sophistication. Finds common ground ("I\'ve experienced that too," "That resonates with me given..."). Integrates stakeholder\'s own language into follow-up questions. Uses verbal reframing ("So what I\'m hearing is X—is that right?"). Explicitly names patterns across stakeholder\'s statements. Validates expertise explicitly ("Your perspective on this is really valuable because..."). Observable: final 3 responses ≥30% longer than first 3. Stakeholder asks interviewer clarifying/reciprocal questions.'
+    ]}
   ]},
   {cluster:'Communication — Cluster 2: Communicating Ideas Clearly',session:'Client Session',inds:[
-    {id:'C2_I1',name:'Organizes ideas logically with clear transitions',ls:['Ideas in arbitrary order. No logic.','Basic sequencing. Transitions implicit.','Logical sequence. Organizational logic evident.','Coherent argument arc. Connects how earlier points inform later ones.']},
-    {id:'C2_I2',name:'Connects claims to evidence',ls:['0–20% claims supported. Opinion-based.','21–40% claims supported. Connections weak.','41–60% claims supported. Explicit reasoning.','60%+ claims. Explains why evidence matters. Addresses limitations.']},
-    {id:'C2_I3',name:'Uses a clear, concise, professional tone',ls:['Difficult to follow. Frequent vague referents.','Understandable but uneven. Some imprecise instances.','Clear and complete. Consistently professional.','Economical and precise. Audience-calibrated register.']}
+    {id:'C2_I1',name:'Organizes ideas logically with clear transitions',ls:[
+      'Ideas appear in arbitrary order with no discernible logic (e.g., jumps from a recommendation to a background fact to an unrelated observation without explanation). Each idea stands alone with no connection to what precedes or follows it. Listener cannot follow the reasoning arc; conclusions (if any) do not follow from what was said before.',
+      'Ideas show basic sequencing — either chronological ("first we asked... then we found...") or simple grouping (puts related ideas together). The logic connecting ideas is implicit: listener can follow the topic but must infer why ideas appear in the order they do. No bridging between groups of ideas; transitions between topics are abrupt.',
+      'Ideas unfold in a logical sequence where each point builds on or prepares for the next. A recognizable organizational logic is evident — problem → evidence → implication, or general → specific, or observation → interpretation — even if not explicitly named. Listener can follow both the topic and the reasoning path without having to infer connections.',
+      'Ideas form a coherent argument arc with a clear through-line from opening observation to conclusion. Student explicitly connects how earlier points inform later ones, showing awareness of the cumulative structure (e.g., "We started by asking about her overall experience, which led us to the ordering confusion, and that\'s what led us to our recommendation about signage"). No significant logical gaps.'
+    ]},
+    {id:'C2_I2',name:'Connects claims to evidence during communication',ls:[
+      'Makes claims without supporting evidence (0–20% of major claims are supported). Statements are opinion-based or unsupported assertions ("This is the best approach" without explaining why). When evidence is mentioned, it appears disconnected from claims.',
+      'Supports 21–40% of major claims with evidence, examples, or data. Connections between claims and evidence are implicit or weak (says "for example" but doesn\'t explain how example supports claim). Evidence is relevant but relationship to claim requires listener inference.',
+      'Supports 41–60% of major claims with 1–2 pieces of relevant evidence. Explicitly connects evidence to claims using reasoning statements ("This shows that...", "This demonstrates...", "Because X occurred, we can conclude Y"). Makes clear why evidence is relevant and how it supports the claim.',
+      'Supports ≥60% of major claims with evidence. Explains not only that evidence supports claim but why ("This 40% increase matters because it exceeds the threshold needed for..."). Addresses evidence quality, limitations, or alternative interpretations ("While this data point suggests X, we should note that...").'
+    ]},
+    {id:'C2_I3',name:'Uses a clear, concise, professional tone',ls:[
+      'Speech is difficult to follow: ideas trail off mid-sentence, restart frequently, or collapse into single-word responses. Language is imprecise with frequent vague referents (≥5 uses of "thing," "stuff," "it" without clear antecedent per 10 minutes). Register is inappropriate: language includes slang ("yeah so like the place was kinda whatever") OR uses unexplained technical terms that obscure meaning.',
+      'Ideas are understandable but delivery is uneven: student completes most thoughts but loses clarity under pressure. Language is clear but includes 2–4 instances of imprecise wording or vague referents per 10 minutes. Register is generally appropriate with 1–2 lapses — occasional informal phrasing or unexplained jargon.',
+      'Ideas are expressed clearly and completely: student states a point, provides a brief explanation, and lands the thought without trailing off or restarting. Language is precise with <2 vague referents per 10 minutes. Register is consistently professional throughout: word choice appropriate for a client-facing context, no unexplained jargon, no informal expressions.',
+      'Ideas are expressed with economy and precision: student conveys the essential point without unnecessary qualification or repetition, and the listener never has to work to extract meaning. Language is precise and economical (uses specific nouns/verbs rather than adjective-heavy descriptions; says "deadline" not "time-related pressure situation"). Register is audience-calibrated: word choice and level of specificity adjust visibly based on who is being addressed.'
+    ]}
   ]},
   {cluster:'Critical Thinking — Cluster 1: Information Analysis',session:'User Session',inds:[
-    {id:'CT1_I1',name:'Asks clear and targeted questions to explore the problem',ls:['0–1 relevant questions. Broad or generic.','2–3 questions. Lack focus or redundant.','4–5 questions. Logical inquiry path.','6+ targeted questions. Tests understanding. Meta-questions.']},
-    {id:'CT1_I3',name:'Evaluates relevance of information',ls:['Follows predetermined sequence regardless of responses.','Occasional adjustment but surface-driven.','Pursues relevant content. Probes vague answers.','Separates experience from opinion. Flags contradictions.']}
+    {id:'CT1_I1',name:'Asks clear and targeted questions to explore the client problem',ls:[
+      'Asks 0–1 task-relevant questions per 10-minute segment. Questions are broad, generic, or unclear, not tied to specific problem elements. Does not follow up on responses or pursue clarification when information is vague or incomplete. No identifiable logical sequence (questions appear random or unconnected to problem context).',
+      'Asks 2–3 relevant questions per 10-minute segment. Questions address the problem but lack focus (cover similar ground OR jump between unrelated topics without completing exploration of any single topic) or are redundant. Includes 1–2 follow-up questions, but they are reactive rather than purposeful ("Why?" or "Can you explain?" without clear purpose). Question sequence shows limited logical progression.',
+      'Asks 4–5 relevant and clearly worded questions per 10-minute segment tied to the problem. Includes 3–4 follow-ups that move from general to specific ("What\'s the issue?" → "What causes it?" → "How does it affect X?"). Question sequence reflects a logical inquiry path (context → detail → implication). Avoids redundant questions.',
+      'Asks 6+ high-value, precisely targeted questions per 10-minute segment that systematically explore the issue. Includes 5+ follow-ups that test understanding or probe mechanisms ("If X is the constraint, what happens if we change Y?" OR "You said both A and B are problems—which is the root cause?"). Demonstrates 1–2 of: asks meta-questions about the inquiry ("What\'s most important to know?"); prioritizes high-leverage questions over peripheral topics.'
+    ]},
+    {id:'CT1_I3',name:'Evaluates relevance of information',ls:[
+      'Questions follow a predetermined sequence regardless of what the customer says. All customer responses are treated as equally useful: student pursues tangential or irrelevant content with the same effort as directly relevant content. When a customer gives a vague or thin answer, student accepts it and moves on without attempting to get something more substantive (Customer: "It was fine." Student: "Okay, and what did you think about the menu?").',
+      'Student occasionally adjusts based on what the customer says but adjustments are driven by surface features rather than analytical relevance. Some tangential content is pursued while clearly relevant content is passed over. When a customer gives a vague answer, student makes one attempt to get more but accepts a second vague answer without further pursuit.',
+      'Student visibly pursues information most relevant to the client problem and moves past content that does not bear on it. When a customer gives a vague or insufficient answer, student probes specifically (Customer: "It was just kind of confusing." Student: "What specifically felt confusing — was it finding where to order, or knowing what to order, or something else?"). Student redirects away from tangential content back toward the problem when the conversation drifts.',
+      'Student distinguishes between different types of information — separates the customer\'s direct experience from their opinions or recommendations, and redirects opinion back toward experience (Customer: "You should add more seating." Student: "Tell me about a time when seating was actually a problem for you — what happened?"). Visibly weighs the sufficiency of information received and probes further when analytically incomplete. When something unexpected or potentially contradictory emerges, student flags it and pursues it rather than passing over it.'
+    ]}
   ]},
   {cluster:'Critical Thinking — Cluster 2: Insight Synthesis',session:'Client Session',inds:[
-    {id:'CT2_I1',name:'Identifies relationships across data points',ls:['0 explicit connections.','1–2 basic connections. Co-occurrence only.','3–4 connections with mechanisms explained.','5+ integrated connections. Causal chains.']},
-    {id:'CT2_I2',name:'Recognizes patterns, themes, and root causes',ls:['0 patterns. Purely descriptive.','1–2 patterns with basic labeling.','3–4 patterns with examples. Root cause distinction.','5+ patterns including latent themes. Root cause rationale.']},
-    {id:'CT2_I3',name:'Synthesizes evidence into insights and implications',ls:['Restates facts only. No causal reasoning.','1–2 descriptive patterns. Incomplete causation.','2–3 insights with causal reasoning. Evidence to insight structure.','4+ systemic insights. Multi-level causal reasoning.']},
-    {id:'CT2_I4',name:'Organizes insights with clear logical structure',ls:['Disconnected list.','Attempts grouping but logic unclear.','Clear framework explicitly named. Logical sequence.','Hierarchical structure. States organizing principle.']}
+    {id:'CT2_I1',name:'Identifies relationships across data points',ls:[
+      'Makes 0 explicit connections between pieces of information during conversation. Describes each data point separately without showing how they relate (e.g., "Person A said X. Person B said Y." with no connection stated). When asked how information relates, cannot articulate relationships or says "I don\'t know".',
+      'Makes 1–2 basic connections between information pieces (e.g., "X and Y are both about cost", "X is related to Y") but mechanism is unclear. Connections identify similarity or co-occurrence but do not explain the mechanism or causation. When probed, provides vague explanations ("They just seem connected").',
+      'Makes 3–4 accurate connections showing how pieces of information relate. Explains mechanisms or causation ("X causes Y because..." OR "When X increases, Y decreases, which suggests..."). Uses connections to build understanding ("These three points all suggest that the root issue is Z"). Connections are accurate based on information provided.',
+      'Makes 5+ integrated connections, weaving multiple data points into a relational structure. Identifies interaction patterns (constraints → behavior → outcome). Demonstrates 1–2 of: explicitly maps causal chains (A→B→C); identifies feedback loops or cyclical patterns; distinguishes direct vs. indirect relationships ("X directly causes Y, but only indirectly affects Z through Y").'
+    ]},
+    {id:'CT2_I2',name:'Recognizes patterns, themes, and root causes',ls:[
+      'Identifies 0 patterns or themes per 10-minute segment. Statements are purely descriptive, listing what was heard without interpretation ("They said X, Y, and Z" without noting these are examples of a pattern). Does not distinguish between surface issues and underlying causes.',
+      'Identifies 1–2 emerging patterns or themes with basic labeling per 10-minute segment ("Cost is a theme" OR "Time pressure came up a lot"). Pattern descriptions are incomplete (names pattern but doesn\'t explain what it means or provide supporting examples). Does not differentiate between root causes and symptoms.',
+      'Identifies 3–4 legitimate patterns/themes with clear, descriptive labels per 10-minute segment ("Resource constraints" not just "problems"). Supports each pattern with specific example(s) from different sources. Distinguishes between symptoms (observable problems) and potential root causes (underlying drivers), identifying 1–2 plausible root causes.',
+      'Identifies 5+ patterns/themes including both surface patterns (what people said) and deeper themes (why they might be saying it) per 10-minute segment. Supports each pattern with multiple examples and explains significance ("Time pressure appeared in 4 contexts, which suggests it\'s systemic, not isolated to one area"). Identifies root cause(s) with clear rationale. Demonstrates 1–2 of: distinguishes what multiple people mentioned vs. what one person emphasized (frequency vs. intensity); identifies contradictory patterns and offers explanation.'
+    ]},
+    {id:'CT2_I3',name:'Synthesizes evidence into insights and implications',ls:[
+      'Provides 0 insights per 10-minute segment, only restates facts or opinions ("They said they need more time" without interpreting what this means). Lists observations without showing relationships. No causal reasoning. No implications offered for actions or decision-making.',
+      'Provides 1–2 descriptive patterns per 10-minute segment with minimal explanation. Groups similar observations into categories but does not explain WHY the pattern exists. Attempts 1 tentative causal statement but reasoning is incomplete or circular. Identifies co-occurrence but not causation. Implications are generic or vague ("We should improve it" without specifying what or how).',
+      'Provides 2–3 thematic insights per 10-minute segment with explicit causal reasoning. Connects 3–4 different observations into coherent theme ("Wait times, ordering confusion, and staffing complaints all relate to operational inconsistency"). Proposes 1-level causal explanation for each insight (explains WHY using "because" reasoning). Identifies 1–2 cause→effect relationships with mechanisms explained. Evidence → Insight → Implication structure is present.',
+      'Provides 4+ systemic insights per 10-minute segment with multi-level causal reasoning. Connects 5+ observations into integrated causal model ("Lack of standardized process [root cause] → employees improvise → creates three symptoms: bottlenecks, inconsistent info, reactive staffing"). Proposes 2+ levels of causal explanation. Identifies root cause and explicitly distinguishes it from symptoms. Addresses contradictions in evidence. Insights reveal non-obvious understanding. Implications are specific, actionable, and prioritized with explicit reasoning.'
+    ]},
+    {id:'CT2_I4',name:'Organizes insights with clear logical structure',ls:[
+      'Presents insights as a disconnected list without organization ("First insight is X. Also, Y. And another thing is Z."). Does not group related insights or show how they connect to each other. No clear beginning, middle, or end to the presentation of findings.',
+      'Attempts to group insights but grouping logic is unclear or inconsistent (the listener can see that related things are near each other but cannot tell why they belong together). Presents 2–3 insights but relationships between them are not explained. Has basic structure but flow between insights is choppy.',
+      'Insights are arranged in a logical sequence where the order serves a clear purpose — most important first, problem before implication, or cause before effect. Explains how insights relate to each other where relevant ("These first two insights are related because..." OR "This insight builds on the previous one"). Presents insights in logical sequence with clear transitions.',
+      'Insights are organized into a structure that shows how they relate at different levels — some insights are primary findings, others are implications or sub-points, and the student makes this hierarchy visible. Explicitly states organizing principle at outset ("I\'ll present insights in order of priority" OR "I\'ll organize by moving from symptoms to root causes"). Demonstrates 1–2 of: uses structural language to clarify hierarchy; shows how insights work together to form a complete picture; prioritizes insights by importance or actionability.'
+    ]}
   ]},
-  {cluster:'Critical Thinking — Cluster 3: Decision Framing',session:'Client Session',inds:[
-    {id:'CT3_I1',name:'Clearly frames the decision or direction',ls:['Does not state decision. Implicit.','Partially articulates. Scope vague.','Clear decision question with criteria.','Precise decision space with options and constraints.']},
-    {id:'CT3_I2',name:'Connects recommendations directly to evidence',ls:['0 connections to evidence.','1–2 weak evidence citations.','60–80% recommendations grounded in evidence.','80%+ with multiple converging evidence. Reasoning auditable.']},
-    {id:'CT3_I4',name:'Provides a logical, feasible recommendation aligned with client needs',ls:['No clear recommendation or inconsistent.','Generic recommendation. Partially misaligned.','Specific and actionable. Feasible. Brief explanation.','Focused and tailored. Follows from prior analysis.']}
+  {cluster:'Critical Thinking — Cluster 3: Decision Framing & Evidence-Based Judgment',session:'Client Session',inds:[
+    {id:'CT3_I1',name:'Clearly frames the decision or direction',ls:[
+      'Does not clearly state what decision, question, or direction is being considered. Problem and decision are blended or left implicit (e.g., discusses issues without proposing what should be decided). Cannot articulate a clear decision point.',
+      'Partially articulates a decision or direction but the scope, criteria, or alternatives remain vague ("We need to do something about X" without specifying what options are being considered). Does not specify decision criteria (doesn\'t state what would make a solution good — cost? speed? user satisfaction?). Alternatives or options are not mentioned.',
+      'States a clear decision question or set of options ("We need to choose between A and B, given constraints C and D"). Indicates decision criteria or constraints for the decision (e.g., cost, feasibility, user experience). Decision framing is complete enough that someone could understand what\'s being decided and on what basis.',
+      'Precisely frames the decision space, including key options, constraints, and success criteria, in a way that would orient a real team or client. Distinguishes clearly between short-term and long-term decisions if relevant. Demonstrates 1–2 of: explicitly states what is NOT being decided (clarifies scope boundaries); identifies who needs to make the decision and when; sequences multiple related decisions ("First we decide X, which then determines options for Y").'
+    ]},
+    {id:'CT3_I2',name:'Connects recommendations directly to evidence',ls:[
+      'Makes recommendations without referencing evidence from the conversation (0 explicit connections to stakeholder statements, data, or observations). Reasoning appears based on personal preference or generic assumptions ("This is a best practice" without connecting to specific context). When asked "Why this recommendation?" cannot cite specific evidence.',
+      'Cites evidence 1–2 times but connections to recommendations are weak (mentions "The client said X" but doesn\'t explain how this supports the recommendation). Most recommendations lack explicit evidence support (≤40% of recommendations connected to evidence).',
+      'Supports 60–80% of recommendations with specific, relevant evidence ("Because the client said X, and we observed Y, we recommend…"). Makes explicit connection statements showing how evidence leads to recommendation (uses "because," "therefore," "this shows that," "given that"). Evidence cited is relevant and accurately represents what was said or observed.',
+      'Systematically grounds more than 80% of major recommendations in multiple, converging evidence (cites 2–3 pieces per recommendation). Makes the reasoning chain from evidence → interpretation → recommendation explicit and easy to audit. Demonstrates 1–2 of: contrasts recommended option with weaker alternatives using evidence; acknowledges when evidence is limited and explains how recommendation accounts for this.'
+    ]},
+    {id:'CT3_I4',name:'Provides a recommendation that is logical, feasible, and aligned with client needs',ls:[
+      'Provides no clear recommendation, OR recommendation is internally inconsistent, infeasible given stated constraints (e.g., recommends expensive solution when budget was identified as major constraint), or unrelated to client\'s stated problem. When asked "What should the client do?" cannot provide coherent answer.',
+      'Provides a recommendation but it is generic ("Improve communication" OR "Do more research" without specifying what). Recommendation is partially misaligned with constraints or priorities mentioned in conversation. Recommendation is plausible but lacks specificity needed for action.',
+      'Provides a specific, actionable recommendation that addresses the core problem identified (e.g., "Implement a weekly check-in process where team members report blockers" rather than just "improve communication"). Recommendation is feasible given major constraints mentioned. Explains in 2–3 sentences why this recommendation addresses the client\'s specific need.',
+      'Provides focused recommendation (or 2–3 prioritized options if appropriate) clearly tailored to client\'s context. Recommendation follows logically from prior analysis. Addresses feasibility directly (acknowledges constraints and explains why recommendation is realistic within them). Demonstrates 1–2 of: scopes recommendation appropriately; anticipates implementation considerations ("This would require X, which seems feasible because Y"); provides decision logic ("If timeline is most critical, do A; if budget is most critical, do B — recommend A because client prioritized speed").'
+    ]}
   ]}
 ];
 
@@ -719,25 +865,86 @@ function renderSum(){
   if(!results.length)return;
   document.getElementById('sum-empty').style.display='none';
   document.getElementById('sum-content').style.display='block';
-  const tot=results.length,fl=results.filter(isFlagged).length;
+  const tot=results.length;
+  const comp=results.filter(s=>s.completed===1).length;
+  const fl=results.filter(isFlagged).length;
   const inc=results.filter(s=>s.completed===0).length;
-  const incIds=results.filter(s=>s.completed===0).map(s=>s.participant_id).join(', ');
-  document.getElementById('ins-grid').innerHTML=`
-    <div class="ins-card"><h3>Flag Rate: ${Math.round(fl/tot*100)}%</h3><p>${fl} of ${tot} students flagged (avg below ${flagT}). ${fl/tot>.5?'Consider reviewing threshold.':'Rate within reasonable range.'}</p></div>
-    <div class="ins-card"><h3>Completion: ${tot-inc} of ${tot}</h3><p>${inc===0?'All students completed both sessions.':`${inc} incomplete: ${incIds}.`}</p></div>
-    <div class="ins-card"><h3>Simulations</h3><p>${[...new Set(results.map(s=>s.simulation))].join(', ')}. ${tot} total evaluations processed.</p></div>`;
-  function chartFor(el,inds,sfx){
-    document.getElementById(el).innerHTML=inds.map(ind=>{
+  const commVals=results.map(s=>s.comm_user).filter(v=>v!==null&&v!==undefined);
+  const ctVals=results.map(s=>s.ct_user).filter(v=>v!==null&&v!==undefined);
+  const avgComm=commVals.length?(commVals.reduce((a,b)=>a+b,0)/commVals.length).toFixed(2):'N/A';
+  const avgCT=ctVals.length?(ctVals.reduce((a,b)=>a+b,0)/ctVals.length).toFixed(2):'N/A';
+  const compRate=Math.round(comp/tot*100);
+  const flagRate=Math.round(fl/tot*100);
+
+  // KPI cards
+  document.getElementById('kpi-grid').innerHTML=`
+    <div class="kpi-card"><div class="kpi-val">${avgComm}</div><div class="kpi-label">Avg Communication Score</div></div>
+    <div class="kpi-card"><div class="kpi-val">${avgCT}</div><div class="kpi-label">Avg Critical Thinking Score</div></div>
+    <div class="kpi-card"><div class="kpi-val">${compRate}%</div><div class="kpi-label">Completion Rate</div></div>
+    <div class="kpi-card"><div class="kpi-val">${flagRate}%</div><div class="kpi-label">Flag Rate</div></div>`;
+
+  // Bar charts
+  function vbarChart(el,inds,sfx){
+    const bars=inds.map(ind=>{
       const vs=results.map(s=>s[`${ind}${sfx}_score`]).filter(v=>v&&v>0);
       const av=vs.length?(vs.reduce((a,b)=>a+b,0)/vs.length).toFixed(2):0;
       const col=av>=3.5?'var(--green)':av>=2.5?'var(--amber)':av>=1.5?'var(--orange)':'var(--red)';
-      return`<div class="bar-row">
-        <div class="bar-lbl">${ind}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${av/4*100}%;background:${col}"></div></div>
-        <div class="bar-val" style="color:${col}">${av}</div>
-      </div>`;}).join('');}
-  chartFor('chart-user',U_IND,'_user');
-  chartFor('chart-client',C_IND,'_client');
+      return{ind,av,pct:(av/4)*100,col};
+    });
+    document.getElementById(el).innerHTML=`
+      <div class="vbar-wrap">
+        ${bars.map(b=>`
+          <div class="vbar-col">
+            <div class="vbar" style="height:${Math.max(b.pct,2)}%;background:${b.col}">
+              <span class="vbar-val">${b.av}</span>
+            </div>
+            <span class="vbar-lbl">${b.ind}</span>
+          </div>`).join('')}
+      </div>`;
+  }
+  vbarChart('chart-user',U_IND,'_user');
+  vbarChart('chart-client',C_IND,'_client');
+
+  // Pie chart — completed vs incomplete
+  const pieData=[
+    {label:'Completed',val:comp,col:'#3b82f6'},
+    {label:'Incomplete',val:inc,col:'#ef4444'},
+  ].filter(d=>d.val>0);
+  const total=pieData.reduce((a,b)=>a+b.val,0);
+  let startAngle=0;
+  const cx=70,cy=70,r=60;
+  const paths=pieData.map(d=>{
+    const angle=(d.val/total)*2*Math.PI;
+    const x1=cx+r*Math.sin(startAngle);
+    const y1=cy-r*Math.cos(startAngle);
+    startAngle+=angle;
+    const x2=cx+r*Math.sin(startAngle);
+    const y2=cy-r*Math.cos(startAngle);
+    const large=angle>Math.PI?1:0;
+    return`<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${d.col}" opacity="0.85"/>`;
+  }).join('');
+  document.getElementById('pie-chart').innerHTML=paths;
+  document.getElementById('pie-legend').innerHTML=pieData.map(d=>`
+    <div class="pie-legend-item">
+      <div class="pie-dot" style="background:${d.col}"></div>
+      <span>${d.label}: <strong>${d.val}</strong> (${Math.round(d.val/total*100)}%)</span>
+    </div>`).join('');
+
+  // Heatmap
+  const allInds=[...U_IND,...C_IND];
+  const hmClass={0:'hm0',1:'hm1',2:'hm2',3:'hm3',4:'hm4'};
+  document.getElementById('heatmap').innerHTML=`
+    <table class="heatmap-table">
+      <thead><tr><th></th>${allInds.map(i=>`<th class="ind-hdr">${i}</th>`).join('')}</tr></thead>
+      <tbody>${results.map(s=>`
+        <tr><td class="sid">${s.participant_id}</td>
+        ${allInds.map(ind=>{
+          const sfx=U_IND.includes(ind)?'_user':'_client';
+          const sc=s[`${ind}${sfx}_score`]??0;
+          return`<td><div class="hm-cell ${hmClass[sc]}">${sc||'–'}</div></td>`;
+        }).join('')}</tr>`).join('')}
+      </tbody>
+    </table>`;
 }
 
 async function sendChat(){
@@ -777,19 +984,32 @@ function renderRubric(){
       </div>
       ${c.inds.map(ind=>`
         <div class="rubric-ind">
-          <div class="rind-header">
-            <span class="rind-id">${ind.id}</span>
-            <span class="rind-name">${ind.name}</span>
+          <div class="rubric-ind-header" onclick="toggleInd(this)">
+            <div class="rind-header">
+              <span class="rind-id">${ind.id}</span>
+              <span class="rind-name">${ind.name}</span>
+            </div>
+            <span class="rind-toggle">▼</span>
           </div>
-          <div class="levels-grid">
-            ${['Beginning','Developing','Applying','Mastery'].map((l,i)=>`
-              <div class="level-box">
-                <div class="level-lbl"><span class="level-num">${i+1}</span>${l}</div>
-                <div class="level-txt">${ind.ls[i]}</div>
-              </div>`).join('')}
+          <div class="rubric-ind-body">
+            <div class="levels-grid">
+              ${['Beginning','Developing','Applying','Mastery'].map((l,i)=>`
+                <div class="level-box">
+                  <div class="level-lbl"><span class="level-num">${i+1}</span>${l}</div>
+                  <div class="level-txt">${ind.ls[i]}</div>
+                </div>`).join('')}
+            </div>
           </div>
         </div>`).join('')}
     </div>`).join('');}
+
+function toggleInd(header){
+  const body=header.nextElementSibling;
+  const toggle=header.querySelector('.rind-toggle');
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  toggle.classList.toggle('open',!isOpen);
+}
 
 async function exportCSV(){
   if(!results.length){toast('No data to export.','err');return;}
