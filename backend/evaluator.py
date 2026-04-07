@@ -1,210 +1,162 @@
 import os
 import json
-import re
-from anthropic import Anthropic
-from dotenv import load_dotenv
+import time
+import anthropic
 
-load_dotenv()
-client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-
-# ── Indicators per session ─────────────────────────────────────────────────────
-USER_INDICATORS = {
-    "C1_I1": "Asks clear, open-ended questions",
-    "C1_I2": "Uses follow-up questions to probe deeper into ideas or emotions",
-    "C1_I3": "Demonstrates active listening (paraphrasing, clarifying, summarizing)",
-    "C1_I5": "Introduces self and purpose professionally",
-    "C1_I6": "Builds rapport through tone, curiosity, and responsiveness",
-    "CT1_I1": "Asks clear and targeted questions to explore the client problem",
-    "CT1_I3": "Evaluates relevance of information",
-}
-
-CLIENT_INDICATORS = {
-    "C2_I1": "Organizes ideas logically with clear transitions",
-    "C2_I2": "Connects claims to evidence during communication",
-    "C2_I3": "Uses a clear, concise, professional tone",
-    "CT2_I1": "Identifies relationships across data points",
-    "CT2_I2": "Recognizes patterns, themes, and root causes",
-    "CT2_I3": "Synthesizes evidence into insights and implications",
-    "CT2_I4": "Organizes insights with clear logical structure",
-    "CT3_I1": "Clearly frames the decision or direction",
-    "CT3_I2": "Connects recommendations directly to evidence",
-    "CT3_I4": "Provides a recommendation that is logical, feasible, and aligned with client needs",
-}
-
-SCORE_LABELS = {0: "N/A", 1: "Beginning", 2: "Developing", 3: "Applying", 4: "Mastery"}
-
-COMM_USER   = ["C1_I1", "C1_I2", "C1_I3", "C1_I5", "C1_I6"]
-CT_USER     = ["CT1_I1", "CT1_I3"]
-COMM_CLIENT = ["C2_I1", "C2_I2", "C2_I3"]
-CT_CLIENT   = ["CT2_I1", "CT2_I2", "CT2_I3", "CT2_I4", "CT3_I1", "CT3_I2", "CT3_I4"]
-
+def get_client():
+    return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 def load_rubric(rubric_text=None):
     if rubric_text:
         return rubric_text
-    for fname in ["rubric.md", "rubric.txt"]:
-        path = os.path.join(os.path.dirname(__file__), fname)
-        if os.path.exists(path):
-            with open(path, "r") as f:
-                return f.read()
-    return None
+    rubric_path = os.path.join(os.path.dirname(__file__), "rubric.md")
+    if os.path.exists(rubric_path):
+        with open(rubric_path, "r") as f:
+            return f.read()
+    return ""
 
-
-def compute_average(scores_dict, keys):
-    vals = [scores_dict[k]["score"] for k in keys
-            if k in scores_dict and scores_dict[k]["score"] > 0]
-    return round(sum(vals) / len(vals), 2) if vals else None
-
-
-def evaluate_session(transcript, participant_id, session_type, duration=0, rubric_text=None):
+def evaluate_session(transcript, participant_id, session_type, duration=0, rubric_text=None, selected_indicators=None):
     if not rubric_text:
         rubric_text = load_rubric()
-    if not rubric_text:
-        return {"error": "Rubric not found"}
 
-    indicators = USER_INDICATORS if session_type == "user" else CLIENT_INDICATORS
-    keys = list(indicators.keys())
+    rubric_section = rubric_text[:4000]
+    transcript_section = str(transcript)[:4000]
 
-    duration_note = ""
-    if duration > 0:
-        mins = round(duration / 60, 1)
-        duration_note = f"Session duration: {mins} minutes. Normalize all quantitative thresholds proportionally to this duration."
+    # Determine which indicators to evaluate
+    if session_type == "user_interview":
+        default_indicators = ["C1_I1", "C1_I2", "C1_I3", "C1_I5", "C1_I6", "CT1_I1", "CT1_I3"]
+    else:
+        default_indicators = ["C2_I1", "C2_I2", "C2_I3", "CT2_I1", "CT2_I2", "CT2_I3", "CT2_I4", "CT3_I1", "CT3_I2", "CT3_I4"]
 
-    c1i5_note = ""
-    if session_type == "user":
-        c1i5_note = """
-SPECIAL RULE for C1_I5:
-Score ONLY the student's first [User] turn after the agent says
-"You're about to begin the customer interview".
-Score 0 if the student never reached this point.
-"""
+    if selected_indicators:
+        indicators_to_use = [i for i in default_indicators if i in selected_indicators]
+        if not indicators_to_use:
+            indicators_to_use = default_indicators
+    else:
+        indicators_to_use = default_indicators
 
-    ind_list = "\n".join([f"- {k}: {v}" for k, v in indicators.items()])
+    ind_list = ", ".join(indicators_to_use)
 
-    example_scores = {}
-    for k in keys:
-        example_scores[k] = {
-            "score": 2,
-            "level": "Developing",
-            "rationale": "2-3 sentences with specific evidence from the transcript",
-            "quotes": ["direct quote from [User] turn"]
-        }
+    prompt = f"""You are an expert rubric-based educational assessor evaluating student interview performance.
 
-    prompt = f"""You are an expert educational assessor evaluating a student in a simulation.
+STUDENT ID: {participant_id}
+SESSION TYPE: {session_type}
+DURATION: {duration} seconds
 
-FULL RUBRIC:
-{rubric_text}
+RUBRIC (use this to score):
+{rubric_section}
 
-YOUR TASK:
-Score this student on ALL of the following indicators for the {session_type.upper()} session.
-Evaluate each indicator INDEPENDENTLY based on its specific rubric criteria.
+TRANSCRIPT TO EVALUATE:
+{transcript_section}
 
-INDICATORS TO SCORE:
-{ind_list}
+INSTRUCTIONS:
+Evaluate ONLY these indicators: {ind_list}
+Score each on a 1-4 scale based strictly on the rubric criteria.
+For each indicator provide:
+- score: integer 1, 2, 3, or 4
+- rationale: 2-3 sentences explaining why this score was given, referencing the rubric
+- feedback: 1-2 sentences of specific, actionable advice for the student to improve
+- quotes: up to 2 direct quotes from the transcript that support the score
 
-{c1i5_note}
+Also provide:
+- comm_score: average of communication indicator scores (float)
+- ct_score: average of critical thinking indicator scores (float)
+- summary: 2-3 sentence overall summary of this student's performance in this session
 
-SCORING SCALE:
-0 = Cannot assess (student never reached that phase)
-1 = Beginning
-2 = Developing
-3 = Applying
-4 = Mastery
-
-{duration_note}
-
-CRITICAL RULES:
-- Score each indicator independently. Do not let one score influence another.
-- Base scores ONLY on observable behaviors in the transcript, not inferred intent.
-- Be consistent — same transcript must always produce same scores.
-- For each indicator, find its specific criteria in the rubric and apply precisely.
-
-STUDENT INFO:
-- ID: {participant_id}
-- Session: {session_type}
-
-TRANSCRIPT:
-{transcript[:6000]}
-
-Return ONLY valid JSON — no markdown, no explanation outside JSON:
+Return ONLY valid JSON, no markdown, no extra text:
 {{
-  "scores": {json.dumps(example_scores, indent=2)}
-}}
-
-For each indicator:
-- score: integer 0, 1, 2, 3, or 4
-- level: exactly "N/A", "Beginning", "Developing", "Applying", or "Mastery"
-- rationale: 2-3 sentences citing specific observable behaviors
-- quotes: 1-3 short direct quotes from [User] turns only. Empty array if score is 0."""
-
-    response = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=4000,
-        temperature=0,
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    raw = response.content[0].text.strip()
-    raw = raw.replace("```json", "").replace("```", "").strip()
+  "scores": {{
+    "INDICATOR_ID": {{
+      "score": 2,
+      "rationale": "explanation referencing rubric criteria",
+      "feedback": "specific actionable improvement advice",
+      "quotes": ["direct quote from transcript"]
+    }}
+  }},
+  "comm_score": 2.1,
+  "ct_score": 1.8,
+  "summary": "overall performance summary"
+}}"""
 
     try:
-        parsed = json.loads(raw)
-        scores = parsed.get("scores", {})
-    except json.JSONDecodeError:
-        match = re.search(r'\{.*\}', raw, re.DOTALL)
-        if match:
-            try:
-                parsed = json.loads(match.group())
-                scores = parsed.get("scores", {})
-            except:
-                scores = {}
-        else:
-            scores = {}
+        client = get_client()
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=2000,
+            temperature=0,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        text = response.content[0].text.strip()
+        # Strip markdown code blocks if present
+        if "```json" in text:
+            text = text.split("```json")[1].split("```")[0].strip()
+        elif "```" in text:
+            text = text.split("```")[1].split("```")[0].strip()
+        return json.loads(text)
+    except Exception as e:
+        print(f"Error evaluating {participant_id} {session_type}: {e}")
+        return None
 
-    result = {}
+def get_col(row, *keys, default=""):
+    """Flexible column extraction — handles different naming conventions"""
     for k in keys:
-        item = scores.get(k, {})
-        sc = item.get("score", 0)
-        if sc not in [0, 1, 2, 3, 4]:
-            sc = 0
-        result[k] = {
-            "score":     sc,
-            "level":     SCORE_LABELS[sc],
-            "rationale": item.get("rationale", "Could not parse response"),
-            "quotes":    item.get("quotes", []),
-        }
+        if k in row and row[k]:
+            return row[k]
+    # Case-insensitive fallback
+    row_lower = {str(k).lower().strip(): v for k, v in row.items()}
+    for k in keys:
+        if str(k).lower() in row_lower and row_lower[str(k).lower()]:
+            return row_lower[str(k).lower()]
+    return default
 
-    return result
+def evaluate_participant(row, rubric_text=None, selected_indicators=None):
+    pid = get_col(row, "participant_id", "student_id", "id", "student", "name", "participant")
+    simulation = get_col(row, "simulation", "sim", "course", "assignment", "session_name", "scenario")
+    transcript_user = get_col(row, "transcript_user", "user_transcript", "interview_transcript",
+                               "transcript_a", "script_a", "user_session", "interview")
+    transcript_client = get_col(row, "transcript_client", "client_transcript", "client_conversation",
+                                 "transcript_b", "script_b", "client_session", "client")
+    duration_user = get_col(row, "duration_seconds_user", "duration_user", "user_duration", default=0)
+    duration_client = get_col(row, "duration_seconds_client", "duration_client", "client_duration", default=0)
+    completed_user = get_col(row, "completed_user", "completed", "status", default="Complete")
 
+    result = {
+        "participant_id": str(pid) if pid else "unknown",
+        "simulation": str(simulation) if simulation else "unknown",
+        "completed": 1 if str(completed_user).lower() in ["complete", "yes", "1", "true", "y"] else 0,
+        "comm_user": None, "ct_user": None,
+        "comm_client": None, "ct_client": None,
+        "_detail": {}
+    }
 
-def evaluate_participant(participant_id, simulation, transcript_user,
-                         transcript_client, duration_user=0,
-                         duration_client=0, rubric_text=None):
-    rubric = load_rubric(rubric_text)
-
-    result = {"participant_id": participant_id, "simulation": simulation,
-              "user": None, "client": None}
-
-    if transcript_user and len(transcript_user.strip()) > 100:
-        user_scores = evaluate_session(
-            transcript=transcript_user, participant_id=participant_id,
-            session_type="user", duration=duration_user, rubric_text=rubric
+    # Evaluate user interview session
+    if transcript_user and len(str(transcript_user).strip()) > 100:
+        time.sleep(8)
+        user_result = evaluate_session(
+            transcript_user, pid, "user_interview",
+            duration=duration_user, rubric_text=rubric_text,
+            selected_indicators=selected_indicators
         )
-        result["user"] = {
-            "scores":   user_scores,
-            "comm_avg": compute_average(user_scores, COMM_USER),
-            "ct_avg":   compute_average(user_scores, CT_USER),
-        }
+        if user_result:
+            result["comm_user"] = round(float(user_result.get("comm_score", 0) or 0), 2)
+            result["ct_user"] = round(float(user_result.get("ct_score", 0) or 0), 2)
+            result["_detail"]["user"] = user_result
+            for ind, data in user_result.get("scores", {}).items():
+                result[f"{ind}_user_score"] = data.get("score", 0)
 
-    if transcript_client and len(transcript_client.strip()) > 100:
-        client_scores = evaluate_session(
-            transcript=transcript_client, participant_id=participant_id,
-            session_type="client", duration=duration_client, rubric_text=rubric
+    # Evaluate client conversation session
+    if transcript_client and len(str(transcript_client).strip()) > 100:
+        time.sleep(8)
+        client_result = evaluate_session(
+            transcript_client, pid, "client_conversation",
+            duration=duration_client, rubric_text=rubric_text,
+            selected_indicators=selected_indicators
         )
-        result["client"] = {
-            "scores":   client_scores,
-            "comm_avg": compute_average(client_scores, COMM_CLIENT),
-            "ct_avg":   compute_average(client_scores, CT_CLIENT),
-        }
+        if client_result:
+            result["comm_client"] = round(float(client_result.get("comm_score", 0) or 0), 2)
+            result["ct_client"] = round(float(client_result.get("ct_score", 0) or 0), 2)
+            result["_detail"]["client"] = client_result
+            for ind, data in client_result.get("scores", {}).items():
+                result[f"{ind}_client_score"] = data.get("score", 0)
 
     return result

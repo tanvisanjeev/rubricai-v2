@@ -16,17 +16,22 @@
   --gradient:linear-gradient(135deg,#3b82f6,#6366f1);
 }
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:14px;line-height:1.6;}
-.sidebar{width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.sidebar{width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
 .logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
 .logo-text{font-size:20px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.5px;}
 .logo-sub{font-size:10px;color:var(--subtle);margin-top:2px;font-weight:500;}
-.nav{flex:1;padding:14px 10px;overflow-y:auto;}
+.nav{flex:1;padding:14px 10px;}
 .nav-label{font-size:9px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:1.2px;padding:6px 10px 4px;margin-top:10px;}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:1px;}
 .nav-item:hover{background:var(--accent-glow);color:var(--text);}
 .nav-item.active{background:var(--accent-glow);color:var(--accent);font-weight:600;border:1px solid rgba(59,130,246,0.2);}
 .nav-item svg{width:15px;height:15px;flex-shrink:0;stroke-width:1.8;}
+.nav-badge{margin-left:auto;background:var(--accent-glow);color:var(--accent);font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;border:1px solid rgba(59,130,246,.2);}
+.nav-badge-green{margin-left:auto;background:rgba(16,185,129,.15);color:#6ee7b7;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;border:1px solid rgba(16,185,129,.2);}
 .sidebar-footer{padding:14px 16px;border-top:1px solid var(--border);}
+.sidebar-clock{margin-bottom:10px;}
+.sidebar-clock-time{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.5px;line-height:1;}
+.sidebar-clock-date{font-size:10px;color:var(--muted);margin-top:3px;}
 .status-pill{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 12px;}
 .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0;}
 .status-text{font-size:11px;color:var(--muted);}
@@ -40,15 +45,71 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
 .btn-ghost{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
 .btn-ghost:hover{background:var(--surface3);color:var(--text);border-color:var(--border2);}
+.btn-sm{padding:4px 10px;font-size:11px;}
 .content{padding:28px;flex:1;}
 .page{display:none;}.page.active{display:block;}
-.page-header{margin-bottom:24px;}
-.page-title{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;}
-.page-sub{font-size:13px;color:var(--muted);}
+
+/* GREETING */
+.greeting-banner{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;}
+.greeting-left h2{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;}
+.greeting-left h2 span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.greeting-left p{font-size:13px;color:var(--muted);}
+.greeting-right{display:flex;gap:16px;align-items:flex-start;flex-shrink:0;}
+.greeting-clock{text-align:right;}
+.greeting-time{font-size:32px;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1;margin-bottom:4px;}
+.greeting-date{font-size:12px;color:var(--muted);}
+.tz-tabs{display:flex;gap:4px;margin-top:6px;justify-content:flex-end;}
+.tz-tab{font-size:10px;color:var(--subtle);background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:20px;cursor:pointer;transition:all .15s;}
+.tz-tab.active{background:var(--accent-glow);color:var(--accent);border-color:rgba(59,130,246,.3);}
+.mini-cal{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;min-width:190px;}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cal-month{font-size:12px;font-weight:700;color:var(--text);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-day-lbl{font-size:9px;font-weight:700;color:var(--subtle);text-align:center;padding:2px 0;}
+.cal-day{font-size:10px;color:var(--muted);text-align:center;padding:3px 2px;border-radius:4px;}
+.cal-today{background:var(--accent);color:#fff;font-weight:700;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:0 auto;}
+.cal-dim{color:var(--subtle);}
+
+/* HOME */
+.sec-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
+.sec-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px;}
+.sec-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.home-section{margin-bottom:36px;}
+.home-hero{text-align:center;padding:48px 32px 36px;border-bottom:1px solid var(--border);margin-bottom:36px;}
+.home-h1{font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.2;margin-bottom:14px;}
+.home-h1 span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.home-sub{font-size:15px;color:var(--muted);max-width:520px;margin:0 auto 28px;line-height:1.8;}
+.home-btns{display:flex;justify-content:center;gap:12px;margin-bottom:32px;}
+.btn-lg{padding:12px 28px;font-size:14px;font-weight:700;border-radius:8px;}
+.btn-outline-lg{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:12px 28px;font-size:14px;font-weight:600;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
+.btn-outline-lg:hover{border-color:var(--accent);color:var(--accent);}
+.hero-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;}
+.hero-stat-val{font-size:28px;font-weight:800;color:var(--accent);}
+.hero-stat-lbl{font-size:10px;color:var(--subtle);font-weight:600;text-transform:uppercase;margin-top:2px;}
+.hero-div{width:1px;background:var(--border);}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;transition:border-color .2s;}
+.feat-card:hover{border-color:var(--border2);}
+.feat-icon{width:38px;height:38px;background:var(--accent-glow);border:1px solid rgba(59,130,246,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:14px;}
+.feat-title{font-size:13px;font-weight:700;margin-bottom:6px;}
+.feat-desc{font-size:12px;color:var(--muted);line-height:1.7;}
+.problem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.problem-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;}
+.problem-val{font-size:26px;font-weight:800;color:var(--accent);margin-bottom:6px;}
+.problem-lbl{font-size:11px;color:var(--muted);line-height:1.5;}
+.compare-table{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:12px;}
+.compare-row{display:grid;grid-template-columns:1fr 1fr;}
+.compare-cell{padding:11px 20px;border-bottom:1px solid var(--border);font-size:13px;}
+.compare-cell:last-child,.compare-cell:nth-last-child(-n+2){border-bottom:none;}
+.int-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.int-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;}
+.roadmap-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.tech-stack{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.tech-tag{background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:20px;font-size:11px;color:var(--muted);}
 
 /* UPLOAD */
 .upload-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;}
-.upload-zone{border:2px dashed var(--border2);border-radius:10px;padding:36px 24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--surface2);min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.upload-zone{border:2px dashed var(--border2);border-radius:10px;padding:32px 24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--surface2);min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .upload-zone:hover{border-color:var(--accent);background:var(--accent-glow);}
 .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
 .upload-icon{width:44px;height:44px;background:var(--accent-glow);border:1px solid rgba(59,130,246,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
@@ -65,6 +126,30 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .prog-bar{height:100%;background:var(--gradient);border-radius:3px;transition:width .4s ease;width:0%;}
 .prog-status{font-size:11px;color:var(--subtle);margin-top:5px;}
 
+/* COLUMN MAPPING MODAL */
+.col-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.col-modal-overlay.open{display:flex;}
+.col-modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:680px;max-height:85vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.5);}
+.col-modal-head{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.col-modal-head h2{font-size:16px;font-weight:700;}
+.col-modal-body{padding:20px 24px;}
+.col-map-row{display:grid;grid-template-columns:1fr 20px 1fr;align-items:center;gap:10px;margin-bottom:10px;}
+.col-map-label{font-size:12px;font-weight:600;color:var(--muted);padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;}
+.col-map-arrow{text-align:center;color:var(--accent);font-size:14px;}
+.col-map-select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:12px;font-family:'Inter',sans-serif;width:100%;outline:none;cursor:pointer;}
+.col-map-select:focus{border-color:var(--accent);}
+.col-sample{font-size:10px;color:var(--subtle);margin-top:2px;padding-left:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* INDICATOR CHECKBOXES */
+.ind-checkbox-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-top:20px;}
+.ind-checkbox-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.ind-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ind-group-label{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.ind-check-label{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:background .1s;}
+.ind-check-label:hover{background:var(--accent-glow);}
+.ind-check-label input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;flex-shrink:0;}
+.ind-check-label span{font-size:11px;color:var(--muted);line-height:1.4;}
+
 /* RUBRIC */
 .rubric-upload-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
 .rubric-status-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;display:flex;align-items:center;gap:14px;}
@@ -75,127 +160,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .rubric-empty{text-align:center;padding:60px 32px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
 .rubric-empty h3{font-size:16px;font-weight:700;margin-bottom:8px;color:var(--muted);}
 .rubric-empty p{font-size:13px;color:var(--subtle);}
-
-/* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
-.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border2);}
-.stat-label{font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
-.stat-value{font-size:32px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px;letter-spacing:-1px;}
-.stat-meta{font-size:11px;color:var(--subtle);}
-.sess-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;}
-.sess-tab{padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--subtle);font-family:'Inter',sans-serif;border-bottom:2px solid transparent;transition:all .15s;}
-.sess-tab:hover{color:var(--text);}
-.sess-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-.table-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.table-top{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
-.table-top h3{font-size:14px;font-weight:700;}
-.table-meta-text{font-size:11px;color:var(--muted);margin-top:2px;}
-.search-input{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;width:220px;outline:none;}
-.search-input:focus{border-color:var(--accent);}
-.search-input::placeholder{color:var(--subtle);}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-thead th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;}
-tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
-tbody tr:hover td{background:var(--accent-glow);}
-tbody tr:last-child{border-bottom:none;}
-td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
-.id-cell{font-family:'SF Mono','Fira Mono',monospace;font-size:11px;color:var(--accent);font-weight:600;}
-.sim-pill{font-size:10px;background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:20px;color:var(--muted);}
-.bdg{display:inline-flex;align-items:center;justify-content:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;}
-.b0{background:rgba(74,101,128,.15);color:var(--subtle);border:1px solid var(--border);}
-.b1{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3);}
-.b2{background:rgba(249,115,22,.15);color:#fdba74;border:1px solid rgba(249,115,22,.3);}
-.b3{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3);}
-.b4{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.3);}
-.sc{font-weight:700;font-size:12px;}
-.st-flag{font-size:11px;font-weight:600;color:#fca5a5;}
-.st-ok{font-size:11px;font-weight:500;color:#6ee7b7;}
-.st-inc{font-size:11px;color:var(--subtle);}
-.comp-y{color:#6ee7b7;font-size:12px;font-weight:500;}
-.comp-n{color:#fca5a5;font-size:12px;font-weight:500;}
-.legend-row{display:flex;gap:14px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
-
-/* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-.overlay.open{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:740px;max-height:88vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.5);}
-.modal-head{padding:22px 26px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;}
-.m-id{font-family:monospace;font-size:11px;color:var(--accent);margin-bottom:3px;font-weight:600;}
-.m-name{font-size:18px;font-weight:800;}
-.m-close{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
-.m-close:hover{background:var(--surface3);}
-.modal-body{padding:20px 26px;}
-.m-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
-.m-stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
-.m-val{font-size:22px;font-weight:800;color:var(--text);}
-.m-lbl{font-size:10px;color:var(--subtle);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
-.sec-ttl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
-.ind-row{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px;}
-.ind-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.ind-key{font-size:11px;font-weight:700;color:var(--text);}
-.ind-desc{font-size:11px;color:var(--muted);margin-bottom:5px;}
-.ind-rat{font-size:11px;color:var(--muted);line-height:1.6;}
-.ind-q{font-size:10px;color:var(--subtle);font-style:italic;padding:4px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;margin-top:4px;}
-.lv-bar{display:flex;gap:3px;margin-top:8px;}
-.lv-seg{flex:1;height:3px;border-radius:2px;background:var(--border);}
-.seg1.on{background:var(--red);}
-.seg2.on{background:var(--orange);}
-.seg3.on{background:var(--amber);}
-.seg4.on{background:var(--green);}
-
-/* DASHBOARD CHARTS */
-.dash-tabs{display:flex;gap:6px;margin-bottom:24px;border-bottom:1px solid var(--border);}
-.dash-tab{padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--subtle);font-family:'Inter',sans-serif;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
-.dash-tab:hover{color:var(--text);}
-.dash-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--accent-glow);border-radius:6px 6px 0 0;}
-.dash-panel{display:none;}.dash-panel.active{display:block;}
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
-.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient);}
-.kpi-val{font-size:34px;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1;margin-bottom:4px;}
-.kpi-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:8px;}
-.kpi-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
-.kpi-up{background:rgba(16,185,129,.15);color:#6ee7b7;}
-.kpi-down{background:rgba(239,68,68,.15);color:#fca5a5;}
-.kpi-neutral{background:var(--surface2);color:var(--muted);}
-.charts-2col{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
-.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;}
-.chart-ttl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:18px;}
-.chart-sub{font-size:11px;color:var(--subtle);margin-top:-12px;margin-bottom:16px;}
-.hbar-list{display:flex;flex-direction:column;gap:10px;}
-.hbar-item{display:flex;align-items:center;gap:10px;}
-.hbar-label{font-size:11px;color:var(--muted);width:200px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;}
-.hbar-track{flex:1;height:20px;background:var(--surface2);border-radius:4px;overflow:hidden;border:1px solid var(--border);position:relative;}
-.hbar-fill{height:100%;border-radius:4px;transition:width .6s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;}
-.hbar-val{font-size:10px;font-weight:700;color:#fff;}
-.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;}
-.donut-svg{width:160px;height:160px;}
-.donut-legend{width:100%;display:flex;flex-direction:column;gap:8px;}
-.donut-item{display:flex;align-items:center;justify-content:space-between;font-size:12px;}
-.donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-right:8px;}
-.donut-left{display:flex;align-items:center;}
-.donut-val{font-weight:700;color:var(--text);}
-.dist-bars{display:flex;gap:8px;height:80px;align-items:flex-end;margin-bottom:8px;}
-.dist-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.dist-bar{width:100%;border-radius:4px 4px 0 0;transition:height .5s ease;}
-.dist-lbl{font-size:9px;color:var(--subtle);text-align:center;}
-.dist-val{font-size:10px;font-weight:700;color:var(--text);}
-.rank-list{display:flex;flex-direction:column;gap:6px;}
-.rank-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;}
-.rank-num{font-size:11px;font-weight:700;color:var(--subtle);width:20px;text-align:center;flex-shrink:0;}
-.rank-id{font-family:monospace;font-size:11px;color:var(--accent);font-weight:600;flex:1;}
-.rank-sim{font-size:10px;color:var(--subtle);}
-.rank-score{font-size:14px;font-weight:800;}
-.exp-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.exp-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .15s;}
-.exp-card:hover{border-color:var(--accent);background:var(--accent-glow);}
-.exp-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-bottom:8px;}
-.exp-card h4{font-size:13px;font-weight:700;margin-bottom:4px;}
-.exp-card p{font-size:12px;color:var(--muted);}
-
-/* RUBRIC ACCORDION */
 .rubric-cluster{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden;}
 .cluster-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2);}
 .cluster-title{font-size:14px;font-weight:700;color:var(--text);}
@@ -217,59 +181,124 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
 .level-num{display:inline-block;width:18px;height:18px;border-radius:4px;background:var(--accent-glow);color:var(--accent);font-size:10px;font-weight:800;text-align:center;line-height:18px;margin-right:5px;border:1px solid rgba(59,130,246,.2);}
 .level-txt{font-size:11px;color:var(--muted);line-height:1.7;}
 
-/* HOME PAGE */
-.home-hero{text-align:center;padding:56px 32px 40px;border-bottom:1px solid var(--border);margin-bottom:36px;}
-.home-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;}
-.home-h1{font-size:38px;font-weight:800;letter-spacing:-1px;line-height:1.2;margin-bottom:14px;}
-.home-h1 span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.home-sub{font-size:15px;color:var(--muted);max-width:520px;margin:0 auto 28px;line-height:1.8;}
-.home-btns{display:flex;justify-content:center;gap:12px;margin-bottom:32px;}
-.btn-lg{padding:12px 28px;font-size:14px;font-weight:700;border-radius:8px;}
-.btn-outline-lg{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:12px 28px;font-size:14px;font-weight:600;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
-.btn-outline-lg:hover{border-color:var(--accent);color:var(--accent);}
-.hero-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;}
-.hero-stat-val{font-size:30px;font-weight:800;color:var(--accent);}
-.hero-stat-lbl{font-size:10px;color:var(--subtle);font-weight:600;text-transform:uppercase;margin-top:2px;}
-.hero-divider{width:1px;background:var(--border);}
-.sec-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
-.sec-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px;}
-.sec-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
-.home-section{margin-bottom:36px;}
-.problem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-.problem-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;}
-.problem-val{font-size:28px;font-weight:800;color:var(--accent);margin-bottom:6px;}
-.problem-lbl{font-size:11px;color:var(--muted);line-height:1.5;}
-.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;transition:border-color .2s;}
-.feat-card:hover{border-color:var(--border2);}
-.feat-icon{width:38px;height:38px;background:var(--accent-glow);border:1px solid rgba(59,130,246,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:14px;}
-.feat-title{font-size:13px;font-weight:700;margin-bottom:6px;}
-.feat-desc{font-size:12px;color:var(--muted);line-height:1.7;}
-.compare-table{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:16px;}
-.compare-head{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);}
-.compare-head-cell{padding:12px 20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;}
-.compare-body{display:grid;grid-template-columns:1fr 1fr;}
-.compare-cell{padding:12px 20px;border-bottom:1px solid var(--border);font-size:13px;}
-.compare-cell:last-child,.compare-cell:nth-last-child(2){border-bottom:none;}
-.confidence-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;margin-bottom:8px;}
-.conf-pct{font-size:13px;font-weight:700;min-width:70px;}
-.conf-title{font-size:13px;font-weight:600;color:var(--text);}
-.conf-desc{font-size:12px;color:var(--muted);}
-.int-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-.int-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;}
-.int-icon{font-size:28px;margin-bottom:10px;}
-.int-title{font-size:13px;font-weight:700;margin-bottom:4px;}
-.int-desc{font-size:12px;color:var(--muted);}
-.roadmap-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.phase-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;}
-.phase-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
-.phase-title{font-size:13px;font-weight:700;margin-bottom:2px;}
-.phase-desc{font-size:12px;color:var(--muted);}
-.tech-stack{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-.tech-tag{background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:20px;font-size:11px;color:var(--muted);}
+/* STATS + TABLE */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border2);}
+.stat-label{font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.stat-value{font-size:32px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px;letter-spacing:-1px;}
+.stat-meta{font-size:11px;color:var(--subtle);}
+.sess-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;}
+.sess-tab{padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--subtle);font-family:'Inter',sans-serif;border-bottom:2px solid transparent;transition:all .15s;}
+.sess-tab:hover{color:var(--text);}
+.sess-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.table-top{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.table-top h3{font-size:14px;font-weight:700;}
+.table-meta-text{font-size:11px;color:var(--muted);margin-top:2px;}
+.search-input{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;width:200px;outline:none;}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--subtle);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{text-align:left;padding:9px 12px;font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:hover td{background:var(--accent-glow);}
+tbody tr:last-child{border-bottom:none;}
+td{padding:9px 12px;color:var(--muted);white-space:nowrap;}
+.id-cell{font-family:'SF Mono','Fira Mono',monospace;font-size:11px;color:var(--accent);font-weight:600;cursor:pointer;}
+.sim-pill{font-size:10px;background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:20px;color:var(--muted);}
+.bdg{display:inline-flex;align-items:center;justify-content:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;}
+.b0{background:rgba(74,101,128,.15);color:var(--subtle);border:1px solid var(--border);}
+.b1{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3);}
+.b2{background:rgba(249,115,22,.15);color:#fdba74;border:1px solid rgba(249,115,22,.3);}
+.b3{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3);}
+.b4{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.3);}
+.sc{font-weight:700;font-size:12px;}
+.st-flag{font-size:11px;font-weight:600;color:#fca5a5;}
+.st-ok{font-size:11px;font-weight:500;color:#6ee7b7;}
+.st-inc{font-size:11px;color:var(--subtle);}
+.comp-y{color:#6ee7b7;font-size:12px;font-weight:500;}
+.comp-n{color:#fca5a5;font-size:12px;font-weight:500;}
+.legend-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:740px;max-height:88vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.5);}
+.modal-head{padding:22px 26px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;}
+.m-id{font-family:monospace;font-size:11px;color:var(--accent);margin-bottom:3px;font-weight:600;}
+.m-name{font-size:18px;font-weight:800;}
+.m-close{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.m-close:hover{background:var(--surface3);}
+.modal-body{padding:20px 26px;}
+.m-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.m-stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.m-val{font-size:22px;font-weight:800;color:var(--text);}
+.m-lbl{font-size:10px;color:var(--subtle);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+.sec-ttl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.ind-row{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px;}
+.ind-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.ind-key{font-size:11px;font-weight:700;color:var(--text);}
+.ind-desc{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.ind-rat{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:4px;}
+.ind-feedback{font-size:11px;color:#6ee7b7;line-height:1.6;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:5px;padding:6px 10px;margin-top:4px;}
+.ind-q{font-size:10px;color:var(--subtle);font-style:italic;padding:4px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;margin-top:4px;}
+.lv-bar{display:flex;gap:3px;margin-top:8px;}
+.lv-seg{flex:1;height:3px;border-radius:2px;background:var(--border);}
+.seg1.on{background:var(--red);}
+.seg2.on{background:var(--orange);}
+.seg3.on{background:var(--amber);}
+.seg4.on{background:var(--green);}
+
+/* SUMMARY DASHBOARD */
+.dash-tabs{display:flex;gap:4px;margin-bottom:22px;border-bottom:1px solid var(--border);}
+.dash-tab{padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--subtle);font-family:'Inter',sans-serif;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.dash-tab:hover{color:var(--text);}
+.dash-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--accent-glow);border-radius:6px 6px 0 0;}
+.dash-panel{display:none;}.dash-panel.active{display:block;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient);}
+.kpi-val{font-size:32px;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1;margin-bottom:4px;}
+.kpi-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:8px;}
+.kpi-badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
+.kpi-up{background:rgba(16,185,129,.15);color:#6ee7b7;}
+.kpi-down{background:rgba(239,68,68,.15);color:#fca5a5;}
+.kpi-neutral{background:var(--surface2);color:var(--muted);}
+.charts-2col{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px;}
+.chart-ttl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:6px;}
+.chart-sub{font-size:11px;color:var(--subtle);margin-bottom:16px;}
+.hbar-list{display:flex;flex-direction:column;gap:10px;}
+.hbar-item{display:flex;align-items:center;gap:10px;}
+.hbar-label{font-size:11px;color:var(--muted);width:210px;flex-shrink:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hbar-track{flex:1;height:22px;background:var(--surface2);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.hbar-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;transition:width .6s ease;}
+.hbar-val{font-size:10px;font-weight:700;color:#fff;}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.donut-legend{width:100%;display:flex;flex-direction:column;gap:8px;}
+.donut-item{display:flex;align-items:center;justify-content:space-between;font-size:12px;}
+.donut-dot{width:10px;height:10px;border-radius:50%;margin-right:8px;}
+.donut-left{display:flex;align-items:center;}
+.donut-val{font-weight:700;color:var(--text);}
+.rank-list{display:flex;flex-direction:column;gap:6px;}
+.rank-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;}
+.rank-num{font-size:11px;font-weight:700;color:var(--subtle);width:20px;text-align:center;flex-shrink:0;}
+.rank-id{font-family:monospace;font-size:11px;color:var(--accent);font-weight:600;flex:1;}
+.rank-sim{font-size:10px;color:var(--subtle);}
+.rank-score{font-size:14px;font-weight:800;}
+.exp-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+.exp-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .15s;}
+.exp-card:hover{border-color:var(--accent);background:var(--accent-glow);}
+.exp-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-bottom:8px;}
+.exp-card h4{font-size:13px;font-weight:700;margin-bottom:4px;}
+.exp-card p{font-size:12px;color:var(--muted);}
+.cohort-summary-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px;position:relative;overflow:hidden;}
+.cohort-summary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient);}
 
 /* CHAT */
-.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px);max-width:820px;}
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 220px);max-width:820px;}
 .chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-bottom:16px;}
 .chat-msg{display:flex;gap:10px;align-items:flex-start;}
 .chat-msg.user{flex-direction:row-reverse;}
@@ -286,6 +315,7 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
 .chat-suggestions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .sugg{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s;}
 .sugg:hover{border-color:var(--accent);color:var(--accent);}
+
 .empty{text-align:center;padding:80px 32px;}
 .empty h3{font-size:17px;font-weight:700;margin-bottom:8px;}
 .empty p{font-size:13px;color:var(--muted);margin-bottom:24px;}
@@ -299,42 +329,58 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
 </style>
 </head>
 <body>
+
+<!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-text">RubricAI</div>
-    <div class="logo-sub">AI-Powered Interview Assessment</div>
+    <div class="logo-sub">CPS LEARN Lab · Northeastern</div>
   </div>
   <nav class="nav">
-    <div class="nav-label">Get Started</div>
+    <div class="nav-label">Main</div>
     <div class="nav-item active" id="nav-landing" onclick="showPage('landing')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
     </div>
-    <div class="nav-label">Workflow</div>
+    <div class="nav-label">Workspace</div>
     <div class="nav-item" id="nav-rubric" onclick="showPage('rubric')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Rubric Framework
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Rubric Framework
     </div>
     <div class="nav-item" id="nav-upload" onclick="showPage('upload')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>Upload Transcripts
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      Upload Transcripts
     </div>
+    <div class="nav-label">Assessment</div>
     <div class="nav-item" id="nav-overview" onclick="showPage('overview')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Class Overview
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Class Overview
+      <span class="nav-badge" id="nav-count" style="display:none"></span>
     </div>
     <div class="nav-item" id="nav-summary" onclick="showPage('summary')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Summary & Charts
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Summary & Charts
     </div>
     <div class="nav-label">Tools</div>
     <div class="nav-item" id="nav-assistant" onclick="showPage('assistant')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>AI Assistant
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      AI Assistant
+      <span class="nav-badge-green">NEW</span>
     </div>
   </nav>
   <div class="sidebar-footer">
+    <div class="sidebar-clock">
+      <div class="sidebar-clock-time" id="sb-time">--:--</div>
+      <div class="sidebar-clock-date" id="sb-date"></div>
+    </div>
     <div class="status-pill">
       <div class="status-dot"></div>
-      <span class="status-text">AI Active · v2.0 · CPS LEARN Lab</span>
+      <span class="status-text">AI Active · v2.0</span>
     </div>
   </div>
 </aside>
 
+<!-- MAIN -->
 <main class="main">
   <div class="topbar">
     <div class="topbar-left">
@@ -352,8 +398,28 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
 
     <!-- HOME -->
     <div class="page active" id="page-landing">
+      <div class="greeting-banner">
+        <div class="greeting-left">
+          <h2 id="greeting-text">Good morning, <span>Instructor</span></h2>
+          <p>Your growth journey starts here · CPS LEARN Lab · Northeastern University</p>
+        </div>
+        <div class="greeting-right">
+          <div class="mini-cal" id="mini-cal"></div>
+          <div class="greeting-clock">
+            <div class="greeting-time" id="greeting-time">--:--</div>
+            <div class="greeting-date" id="greeting-date"></div>
+            <div class="tz-tabs">
+              <div class="tz-tab active" onclick="switchTZ('ET',this)">ET</div>
+              <div class="tz-tab" onclick="switchTZ('CT',this)">CT</div>
+              <div class="tz-tab" onclick="switchTZ('MT',this)">MT</div>
+              <div class="tz-tab" onclick="switchTZ('PT',this)">PT</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="home-hero">
-        <div class="home-label">CPS LEARN Lab · Northeastern University</div>
+        <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;">CPS LEARN Lab · Northeastern University</div>
         <div class="home-h1">Less time grading.<br><span>More time teaching.</span></div>
         <div class="home-sub">RubricAI evaluates student interview transcripts against your institution's rubric — delivering evidence-based scores, actionable feedback, and exportable gradebooks in minutes, not weeks.</div>
         <div class="home-btns">
@@ -362,11 +428,11 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
         </div>
         <div class="hero-stats">
           <div><div class="hero-stat-val">80%</div><div class="hero-stat-lbl">Grading Time Saved</div></div>
-          <div class="hero-divider"></div>
-          <div><div class="hero-stat-val">At Scale</div><div class="hero-stat-lbl">Any Cohort Size</div></div>
-          <div class="hero-divider"></div>
-          <div><div class="hero-stat-val">Custom</div><div class="hero-stat-lbl">Your Rubric Applied</div></div>
-          <div class="hero-divider"></div>
+          <div class="hero-div"></div>
+          <div><div class="hero-stat-val">Any Rubric</div><div class="hero-stat-lbl">Upload Your Own</div></div>
+          <div class="hero-div"></div>
+          <div><div class="hero-stat-val">Any File</div><div class="hero-stat-lbl">Flexible CSV Format</div></div>
+          <div class="hero-div"></div>
           <div><div class="hero-stat-val">100%</div><div class="hero-stat-lbl">Faculty Control</div></div>
         </div>
       </div>
@@ -374,7 +440,7 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
       <div class="home-section">
         <div class="sec-label">The Problem</div>
         <div class="sec-title">Manual grading of interview transcripts at scale is unsustainable.</div>
-        <div class="sec-sub">Faculty spend an average of 9.9 hours per week on grading alone. For interview-based assessments at scale, the burden becomes unmanageable.</div>
+        <div class="sec-sub">Faculty spend an average of 9.9 hours per week on grading alone.</div>
         <div class="problem-grid">
           <div class="problem-card"><div class="problem-val">9.9h</div><div class="problem-lbl">avg. weekly grading hours per faculty</div></div>
           <div class="problem-card"><div class="problem-val">62%</div><div class="problem-lbl">say grading is one of the worst parts</div></div>
@@ -386,14 +452,13 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
       <div class="home-section">
         <div class="sec-label">Features</div>
         <div class="sec-title">Everything faculty need. Nothing they don't.</div>
-        <div class="sec-sub">Streamline rubric-based interview evaluation at institutional scale.</div>
         <div class="feat-grid">
           <div class="feat-card"><div class="feat-icon">⚡</div><div class="feat-title">Auto Evaluation at Scale</div><div class="feat-desc">Hundreds of submissions graded in minutes. Faculty validate — not grade from scratch.</div></div>
-          <div class="feat-card"><div class="feat-icon">🎯</div><div class="feat-title">Your Rubric. Applied Exactly.</div><div class="feat-desc">Upload your rubric — AI applies it deductively. Your standards, every time. No generic judgment.</div></div>
-          <div class="feat-card"><div class="feat-icon">📋</div><div class="feat-title">Evidence-Based Feedback</div><div class="feat-desc">Every score backed by direct transcript quotes. Justification, strengths, and next steps.</div></div>
-          <div class="feat-card"><div class="feat-icon">⚖️</div><div class="feat-title">Equity in Grading</div><div class="feat-desc">Same rubric. Same model. Every student. Eliminates fatigue and unconscious bias.</div></div>
-          <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">Class-Level Intelligence</div><div class="feat-desc">Data-driven cohort view. Identify learning gaps and flag struggling students early.</div></div>
-          <div class="feat-card"><div class="feat-icon">✏️</div><div class="feat-title">Full Faculty Control</div><div class="feat-desc">Review, edit, override any score. Export CSV or PDF. AI assists — you decide. Always.</div></div>
+          <div class="feat-card"><div class="feat-icon">🎯</div><div class="feat-title">Any Rubric. Applied Exactly.</div><div class="feat-desc">Upload any markdown rubric. AI parses clusters, indicators, and level descriptors automatically.</div></div>
+          <div class="feat-card"><div class="feat-icon">📋</div><div class="feat-title">Evidence-Based Feedback</div><div class="feat-desc">Every score backed by direct transcript quotes plus actionable improvement feedback per indicator.</div></div>
+          <div class="feat-card"><div class="feat-icon">🔧</div><div class="feat-title">Any File Format</div><div class="feat-desc">Upload any CSV — the tool auto-detects columns or lets you map them manually. No template required.</div></div>
+          <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">Class-Level Intelligence</div><div class="feat-desc">AI-generated cohort summary, indicator charts, student rankings, and flagged student alerts.</div></div>
+          <div class="feat-card"><div class="feat-icon">⬇️</div><div class="feat-title">Per-Student Downloads</div><div class="feat-desc">Download individual student reports as CSV or PDF — with scores, rationale, and feedback included.</div></div>
         </div>
       </div>
 
@@ -401,73 +466,39 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
         <div class="sec-label">The Difference</div>
         <div class="sec-title">RubricAI vs Traditional Grading</div>
         <div class="compare-table">
-          <div class="compare-head">
-            <div class="compare-head-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);">Without RubricAI</div>
-            <div class="compare-head-cell" style="color:var(--accent);">With RubricAI</div>
+          <div class="compare-row" style="border-bottom:1px solid var(--border);">
+            <div class="compare-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;">Without RubricAI</div>
+            <div class="compare-cell" style="color:var(--accent);font-size:11px;font-weight:700;text-transform:uppercase;">With RubricAI</div>
           </div>
-          <div class="compare-body">
-            <div class="compare-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);">Hours of manual grading per faculty</div>
-            <div class="compare-cell" style="color:var(--text);font-weight:500;">Transcripts evaluated in minutes</div>
-            <div class="compare-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);">Fatigue affects late papers — inconsistent</div>
-            <div class="compare-cell" style="color:var(--text);font-weight:500;">Every score traces to rubric criteria</div>
-            <div class="compare-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);">Generic: "needs improvement"</div>
-            <div class="compare-cell" style="color:var(--text);font-weight:500;">Specific feedback with transcript quotes</div>
-            <div class="compare-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);">No audit trail for scores</div>
-            <div class="compare-cell" style="color:var(--text);font-weight:500;">Justification + evidence per evaluation</div>
-            <div class="compare-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);border-bottom:none;">Manual gradebook entry</div>
-            <div class="compare-cell" style="color:var(--text);font-weight:500;border-bottom:none;">One-click CSV + PDF export</div>
-          </div>
+          <div class="compare-row"><div class="compare-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);">Hours of manual grading per faculty</div><div class="compare-cell" style="color:var(--text);font-weight:500;">Transcripts evaluated in minutes</div></div>
+          <div class="compare-row"><div class="compare-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);">Fatigue affects late papers — inconsistent</div><div class="compare-cell" style="color:var(--text);font-weight:500;">Every score traces to rubric criteria</div></div>
+          <div class="compare-row"><div class="compare-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);">Generic: "needs improvement"</div><div class="compare-cell" style="color:var(--text);font-weight:500;">Specific feedback with transcript quotes</div></div>
+          <div class="compare-row"><div class="compare-cell" style="background:var(--surface2);color:var(--subtle);border-right:1px solid var(--border);border-bottom:none;">Manual gradebook entry</div><div class="compare-cell" style="color:var(--text);font-weight:500;border-bottom:none;">One-click CSV + PDF export per student</div></div>
         </div>
       </div>
 
-      <div class="home-section">
-        <div class="sec-label">AI Transparency</div>
-        <div class="sec-title">Responsible AI evaluation.</div>
-        <div class="sec-sub">Built on six principles that ensure every evaluation is fair, auditable, and human-validated.</div>
-        <div class="feat-grid" style="margin-bottom:20px;">
-          <div class="feat-card"><div class="feat-icon" style="font-size:13px;font-weight:800;color:var(--accent);">1</div><div class="feat-title">Evidence-Based Scoring</div><div class="feat-desc">Every score backed by direct quotes from the transcript. No black-box grading.</div></div>
-          <div class="feat-card"><div class="feat-icon" style="font-size:13px;font-weight:800;color:var(--accent);">2</div><div class="feat-title">Rubric-Governed</div><div class="feat-desc">All evaluations grounded in your published rubric. AI matches evidence — never invents it.</div></div>
-          <div class="feat-card"><div class="feat-icon" style="font-size:13px;font-weight:800;color:var(--accent);">3</div><div class="feat-title">Confidence Scoring</div><div class="feat-desc">Every evaluation includes a confidence score. Below 60% is auto-flagged for review.</div></div>
-          <div class="feat-card"><div class="feat-icon" style="font-size:13px;font-weight:800;color:var(--accent);">4</div><div class="feat-title">Instructor Override</div><div class="feat-desc">Every AI score can be reviewed and overridden. AI assists — educators decide. Always.</div></div>
-          <div class="feat-card"><div class="feat-icon" style="font-size:13px;font-weight:800;color:var(--accent);">5</div><div class="feat-title">Data Privacy</div><div class="feat-desc">Student data processed locally. No external storage. Exports download to your machine.</div></div>
-          <div class="feat-card"><div class="feat-icon" style="font-size:13px;font-weight:800;color:var(--accent);">6</div><div class="feat-title">Consistency & Fairness</div><div class="feat-desc">Every student evaluated against the same rubric by the same model. Eliminates evaluator bias.</div></div>
-        </div>
-      </div>
-
-      <div class="home-section">
-        <div class="sec-label">Integrations <span style="background:var(--surface2);color:var(--muted);padding:2px 8px;border-radius:4px;font-size:10px;margin-left:4px;">Coming Soon</span></div>
-        <div class="sec-title">Plugs into tools you already use.</div>
-        <div class="sec-sub">No new workflows required for your institution.</div>
-        <div class="int-grid">
-          <div class="int-card"><div class="int-icon">📚</div><div class="int-title">Canvas LMS</div><div class="int-desc">Import submissions, push scores to gradebook</div></div>
-          <div class="int-card"><div class="int-icon">🎓</div><div class="int-title">Google Classroom</div><div class="int-desc">Sync assignments and share feedback</div></div>
-          <div class="int-card"><div class="int-icon">📋</div><div class="int-title">Blackboard</div><div class="int-desc">Integrate with existing course structures</div></div>
-          <div class="int-card"><div class="int-icon">🔗</div><div class="int-title">REST API</div><div class="int-desc">Connect any LMS or internal platform</div></div>
-        </div>
-      </div>
-
-      <div class="roadmap-grid">
+      <div class="roadmap-grid" style="margin-bottom:28px;">
         <div class="chart-card">
           <div class="sec-label" style="margin-bottom:14px;">Roadmap</div>
-          <div class="phase-row"><div class="phase-dot" style="background:var(--accent)"></div><div><div class="phase-title">Phase 1 — Done · Feb 2026</div><div class="phase-desc">AI scoring · Upload flow · Export · AI Assistant</div></div></div>
-          <div class="phase-row"><div class="phase-dot" style="background:var(--border2);border:2px solid var(--border2)"></div><div><div class="phase-title" style="color:var(--muted);">Phase 2 — Mar 2026</div><div class="phase-desc">Communication · 10 indicators · Canvas</div></div></div>
-          <div class="phase-row"><div class="phase-dot" style="background:var(--border2);border:2px solid var(--border2)"></div><div><div class="phase-title" style="color:var(--muted);">Phase 3 — Apr 2026</div><div class="phase-desc">Critical Thinking · 12 indicators · Google Classroom</div></div></div>
-          <div class="phase-row"><div class="phase-dot" style="background:var(--border2);border:2px solid var(--border2)"></div><div><div class="phase-title" style="color:var(--muted);">Phase 4 — May 2026</div><div class="phase-desc">Prof. Agency · All 34 indicators · REST API</div></div></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px;"></div><div><div style="font-size:13px;font-weight:700;margin-bottom:2px;">Phase 1 — Done · Feb 2026</div><div style="font-size:12px;color:var(--muted);">AI scoring · Upload flow · Export · AI Assistant</div></div></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px;"></div><div><div style="font-size:13px;font-weight:700;margin-bottom:2px;">Phase 2 — Done · Apr 2026</div><div style="font-size:12px;color:var(--muted);">Any rubric · Any CSV · Indicator selection · Per-student downloads · Cohort summary</div></div></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:5px;"></div><div><div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:2px;">Phase 3 — May 2026</div><div style="font-size:12px;color:var(--subtle);">Human vs AI comparison · Persistent storage · Canvas LMS</div></div></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;"><div style="width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:5px;"></div><div><div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:2px;">Phase 4 — Summer 2026</div><div style="font-size:12px;color:var(--subtle);">Multi-institution · Subscription · REST API</div></div></div>
         </div>
         <div class="chart-card">
           <div class="sec-label" style="margin-bottom:14px;">Built By</div>
-          <div style="padding:14px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent);margin-bottom:10px;"><div style="font-size:13px;font-weight:700;margin-bottom:3px;">Tanvi Kadam</div><div style="font-size:12px;color:var(--muted);">Developer · MS Applied Machine Intelligence · Northeastern University</div></div>
+          <div style="padding:14px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent);margin-bottom:10px;"><div style="font-size:13px;font-weight:700;margin-bottom:3px;">Tanvi Kadam</div><div style="font-size:12px;color:var(--muted);">AI Engineer · MS Applied Machine Intelligence · Northeastern University</div></div>
           <div style="padding:14px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--border);margin-bottom:10px;"><div style="font-size:13px;font-weight:700;margin-bottom:3px;">CPS LEARN Lab</div><div style="font-size:12px;color:var(--muted);">Northeastern University · College of Professional Studies</div></div>
-          <div style="padding:10px;background:var(--surface2);border-radius:8px;"><div style="font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;margin-bottom:8px;">Tech Stack</div><div class="tech-stack"><span class="tech-tag">Python</span><span class="tech-tag">FastAPI</span><span class="tech-tag">Claude API</span><span class="tech-tag">REST API</span><span class="tech-tag">Cloud Deployment</span></div></div>
+          <div style="padding:10px;background:var(--surface2);border-radius:8px;"><div style="font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;margin-bottom:8px;">Tech Stack</div><div class="tech-stack"><span class="tech-tag">Python</span><span class="tech-tag">FastAPI</span><span class="tech-tag">Claude API</span><span class="tech-tag">REST API</span><span class="tech-tag">Cloud Ready</span></div></div>
         </div>
       </div>
     </div>
 
-    <!-- RUBRIC -->
+    <!-- RUBRIC FRAMEWORK -->
     <div class="page" id="page-rubric">
-      <div class="page-header">
-        <div class="page-title">Rubric Framework</div>
-        <div class="page-sub">Upload your rubric file. The full framework populates automatically below.</div>
+      <div style="margin-bottom:24px;">
+        <div class="page-title" style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;">Rubric Framework</div>
+        <div style="font-size:13px;color:var(--muted);">Upload your rubric file. Framework populates automatically. Then select which indicators to evaluate.</div>
       </div>
       <div class="rubric-upload-row">
         <div class="upload-card" style="padding:20px;">
@@ -483,28 +514,37 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
           <div class="rubric-status-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
           <div>
             <div class="rubric-status-title" id="rubric-status-title">No rubric uploaded</div>
-            <div class="rubric-status-sub" id="rubric-status-sub">Upload any rubric file in .md or .txt format. The framework will populate automatically.</div>
+            <div style="font-size:11px;color:var(--muted);" id="rubric-status-sub">Upload any .md or .txt rubric file. Clusters, indicators, and level descriptors will parse automatically.</div>
           </div>
         </div>
       </div>
       <div id="rubric-content">
-        <div class="rubric-empty"><h3>Upload a rubric to see the framework</h3><p>Any markdown rubric with clusters, indicators, and level descriptors will be parsed and displayed here automatically.</p></div>
+        <div class="rubric-empty"><h3>Upload a rubric to see the framework</h3><p>Any markdown rubric will be parsed and displayed here automatically.</p></div>
       </div>
+      <!-- INDICATOR CHECKBOXES -->
+      <div id="ind-checkboxes"></div>
     </div>
 
-    <!-- UPLOAD -->
+    <!-- UPLOAD TRANSCRIPTS -->
     <div class="page" id="page-upload">
-      <div class="page-header">
-        <div class="page-title">Upload Transcripts</div>
-        <div class="page-sub">Upload your transcript CSV. Make sure your rubric is uploaded in Rubric Framework first.</div>
+      <div style="margin-bottom:24px;">
+        <div class="page-title" style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;">Upload Transcripts</div>
+        <div style="font-size:13px;color:var(--muted);">Upload any CSV file. The tool will auto-detect your column format or let you map them manually.</div>
       </div>
       <div class="upload-card">
         <div class="upload-zone" id="drop-zone">
-          <input type="file" accept=".csv" onchange="handleFile(this)"/>
+          <input type="file" accept=".csv,.xlsx,.txt" onchange="handleFile(this)"/>
           <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
-          <h3>Select Transcript CSV</h3>
-          <p>Drag and drop, or click to browse</p>
+          <h3>Select Transcript File</h3>
+          <p>CSV with any column format — auto-detected</p>
           <div class="file-tag" id="file-name"></div>
+        </div>
+        <div id="col-mapping-banner" style="display:none;margin-top:16px;background:var(--accent-glow);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:2px;" id="col-banner-title">Columns detected</div>
+            <div style="font-size:11px;color:var(--muted);" id="col-banner-sub">Review the mapping below or adjust before running.</div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:11px;" onclick="openColModal()">Edit Mapping</button>
         </div>
         <div class="progress-wrap" id="progress-wrap">
           <div class="prog-label">Evaluating with AI...</div>
@@ -515,7 +555,7 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
       </div>
     </div>
 
-    <!-- OVERVIEW -->
+    <!-- CLASS OVERVIEW -->
     <div class="page" id="page-overview">
       <div id="ov-empty" class="empty">
         <h3>No results yet</h3>
@@ -524,19 +564,22 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
       </div>
       <div id="ov-content" style="display:none">
         <div class="stats-row" id="stats-row"></div>
-        <div class="legend-row">
-          <span style="font-size:11px;color:var(--subtle);font-weight:700;margin-right:4px">Score:</span>
-          <span class="legend-item"><span class="bdg b1">Beg</span> Beginning</span>
-          <span class="legend-item"><span class="bdg b2">Dev</span> Developing</span>
-          <span class="legend-item"><span class="bdg b3">App</span> Applying</span>
-          <span class="legend-item"><span class="bdg b4">Mas</span> Mastery</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div class="legend-row">
+            <span style="font-size:11px;color:var(--subtle);font-weight:700;margin-right:4px">Score:</span>
+            <span class="legend-item"><span class="bdg b1">Beg</span></span>
+            <span class="legend-item"><span class="bdg b2">Dev</span></span>
+            <span class="legend-item"><span class="bdg b3">App</span></span>
+            <span class="legend-item"><span class="bdg b4">Mas</span></span>
+          </div>
+          <button class="btn btn-ghost" style="font-size:11px;" onclick="exportCSV()">⬇ Download All CSV</button>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div class="sess-tabs">
+          <div class="sess-tabs" style="margin-bottom:0;">
             <button class="sess-tab active" onclick="switchSess('user',this)">User Interview</button>
             <button class="sess-tab" onclick="switchSess('client',this)">Client Conversation</button>
           </div>
-          <input class="search-input" placeholder="Search by student ID..." oninput="filterTbl(this.value)"/>
+          <input class="search-input" placeholder="Search student..." oninput="filterTbl(this.value)"/>
         </div>
         <div class="table-card">
           <div class="table-top"><div><h3 id="tbl-title">Class Overview</h3><div class="table-meta-text" id="tbl-meta"></div></div></div>
@@ -545,7 +588,7 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
       </div>
     </div>
 
-    <!-- SUMMARY -->
+    <!-- SUMMARY & CHARTS -->
     <div class="page" id="page-summary">
       <div id="sum-empty" class="empty">
         <h3>No data to summarize</h3>
@@ -553,6 +596,19 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
         <button class="btn" onclick="showPage('upload')">Go to Upload</button>
       </div>
       <div id="sum-content" style="display:none">
+        <!-- COHORT SUMMARY -->
+        <div class="cohort-summary-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">AI Cohort Summary</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">Class Performance Overview</div>
+            </div>
+            <button class="btn btn-ghost" style="font-size:11px;padding:5px 12px;" onclick="generateCohortSummary()">↻ Regenerate</button>
+          </div>
+          <div id="cohort-summary-text" style="font-size:13px;color:var(--muted);line-height:1.8;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;">
+            Click "Regenerate" to generate an AI summary of your cohort's performance.
+          </div>
+        </div>
         <div class="dash-tabs">
           <button class="dash-tab active" onclick="switchDash('overview',this)">Overview</button>
           <button class="dash-tab" onclick="switchDash('user',this)">User Interview</button>
@@ -563,42 +619,44 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
         <div class="dash-panel" id="dash-user"></div>
         <div class="dash-panel" id="dash-client"></div>
         <div class="dash-panel" id="dash-students"></div>
-        <div class="exp-row" style="margin-top:20px;">
-          <div class="exp-card" onclick="exportCSV()"><div class="exp-type">CSV</div><h4>Spreadsheet Export</h4><p>All indicators and scores. Compatible with Excel and Google Sheets.</p></div>
-          <div class="exp-card" onclick="exportPDF()"><div class="exp-type">PDF</div><h4>Formatted Report</h4><p>Print-ready class report with summary stats and full evaluation table.</p></div>
+        <div class="exp-row">
+          <div class="exp-card" onclick="exportCSV()"><div class="exp-type">CSV</div><h4>Spreadsheet Export</h4><p>All indicators, scores, and class data.</p></div>
+          <div class="exp-card" onclick="exportPDF()"><div class="exp-type">PDF</div><h4>Formatted Report</h4><p>Print-ready class report with feedback per indicator.</p></div>
         </div>
       </div>
     </div>
 
     <!-- AI ASSISTANT -->
     <div class="page" id="page-assistant">
-      <div class="page-header">
-        <div class="page-title">AI Assistant</div>
-        <div class="page-sub">Ask questions about student results or the rubric framework.</div>
+      <div style="margin-bottom:20px;">
+        <div class="page-title" style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;">AI Assistant</div>
+        <div style="font-size:13px;color:var(--muted);">Ask questions about student results or the rubric framework.</div>
       </div>
       <div class="chat-suggestions">
-        <div class="sugg" onclick="fillChat('Which students need the most support?')">Which students need the most support?</div>
-        <div class="sugg" onclick="fillChat('What is the class average score?')">What is the class average?</div>
-        <div class="sugg" onclick="fillChat('Which indicator has the lowest average score?')">Lowest scoring indicator?</div>
-        <div class="sugg" onclick="fillChat('How many students are flagged and why?')">How many students flagged?</div>
+        <div class="sugg" onclick="fillChat('Which students need the most support?')">Who needs most support?</div>
+        <div class="sugg" onclick="fillChat('What is the class average score?')">Class average?</div>
+        <div class="sugg" onclick="fillChat('Which indicator has the lowest average?')">Lowest indicator?</div>
+        <div class="sugg" onclick="fillChat('Summarize the cohort performance')">Cohort summary</div>
+        <div class="sugg" onclick="fillChat('Which students are flagged and why?')">Flagged students?</div>
       </div>
       <div class="chat-wrap">
         <div class="chat-msgs" id="chat-msgs">
           <div class="chat-msg assistant">
             <div class="avatar">AI</div>
-            <div class="bubble">Hello. I can help you analyse evaluation results or answer questions about the rubric. Run an evaluation first, then ask me anything about the students or their scores.</div>
+            <div class="bubble">Hello! I can help you understand student results or answer questions about the rubric. Run an evaluation first, then ask me anything about performance, scores, or feedback.</div>
           </div>
         </div>
         <div class="chat-input-row">
-          <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about student results or the rubric..." onkeydown="chatKey(event)"></textarea>
+          <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about results or rubric..." onkeydown="chatKey(event)"></textarea>
           <button class="btn" onclick="sendChat()">Send</button>
         </div>
       </div>
     </div>
+
   </div>
 </main>
 
-<!-- MODAL -->
+<!-- STUDENT DETAIL MODAL -->
 <div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-head">
@@ -607,18 +665,41 @@ td{padding:10px 14px;color:var(--muted);white-space:nowrap;}
     </div>
     <div class="modal-body">
       <div class="m-stats" id="m-stats"></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button class="btn btn-ghost" style="font-size:11px;" onclick="downloadStudentCSV(currentPid)">⬇ Download CSV</button>
+        <button class="btn btn-ghost" style="font-size:11px;" onclick="downloadStudentPDF(currentPid)">⬇ Download PDF</button>
+      </div>
       <div id="m-user"></div>
       <div id="m-client"></div>
     </div>
   </div>
 </div>
+
+<!-- COLUMN MAPPING MODAL -->
+<div class="col-modal-overlay" id="col-modal">
+  <div class="col-modal">
+    <div class="col-modal-head">
+      <div>
+        <h2>Column Mapping</h2>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="col-modal-sub">Map your CSV columns to the required fields</div>
+      </div>
+      <button class="m-close" onclick="closeColModal()">✕</button>
+    </div>
+    <div class="col-modal-body">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">We auto-detected these mappings. Adjust if anything looks wrong, then confirm to proceed.</div>
+      <div id="col-map-rows"></div>
+      <div style="margin-top:20px;display:flex;gap:10px;">
+        <button class="btn" onclick="confirmColMapping()" style="flex:1;">Confirm Mapping & Continue</button>
+        <button class="btn btn-ghost" onclick="closeColModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 const API='http://localhost:8000';
-let results=[],sess='user',file=null,rubricFile=null,flagT=2.0,chatHist=[];
-let parsedRubric=[];
-
 const U_IND=['C1_I1','C1_I2','C1_I3','C1_I5','C1_I6','CT1_I1','CT1_I3'];
 const C_IND=['C2_I1','C2_I2','C2_I3','CT2_I1','CT2_I2','CT2_I3','CT2_I4','CT3_I1','CT3_I2','CT3_I4'];
 const DESC={
@@ -635,7 +716,60 @@ const DESC={
 const BC=['b0','b1','b2','b3','b4'];
 const BS=['N/A','Beg','Dev','App','Mas'];
 
-// ── RUBRIC PARSER ──────────────────────────────────────────────
+let results=[],sess='user',file=null,rubricFile=null,flagT=2.0,chatHist=[];
+let parsedRubric=[],cohortSummary='',currentPid='';
+let selectedInds=new Set([...U_IND,...C_IND]);
+let detectedColumns=[],columnMapping={},csvSample={};
+let colMappingConfirmed=false;
+
+// ── CLOCK ─────────────────────────────────────────────────────
+let currentTZ='America/New_York';
+const TZ_MAP={ET:'America/New_York',CT:'America/Chicago',MT:'America/Denver',PT:'America/Los_Angeles'};
+
+function switchTZ(tz,btn){
+  currentTZ=TZ_MAP[tz];
+  document.querySelectorAll('.tz-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  updateClock();
+}
+
+function updateClock(){
+  const now=new Date();
+  const timeStr=now.toLocaleTimeString('en-US',{timeZone:currentTZ,hour:'2-digit',minute:'2-digit',hour12:true});
+  const dateStr=now.toLocaleDateString('en-US',{timeZone:currentTZ,weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const hour=parseInt(now.toLocaleTimeString('en-US',{timeZone:currentTZ,hour:'2-digit',hour12:false}));
+  const greeting=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
+  const gt=document.getElementById('greeting-text');
+  if(gt) gt.innerHTML=`${greeting}, <span>Instructor</span>`;
+  const gtm=document.getElementById('greeting-time');if(gtm) gtm.textContent=timeStr;
+  const gd=document.getElementById('greeting-date');if(gd) gd.textContent=dateStr;
+  const st=document.getElementById('sb-time');if(st) st.textContent=timeStr;
+  const sd=document.getElementById('sb-date');if(sd) sd.textContent=now.toLocaleDateString('en-US',{timeZone:currentTZ,weekday:'short',month:'short',day:'numeric'});
+}
+
+function buildCalendar(){
+  const cal=document.getElementById('mini-cal');if(!cal)return;
+  const now=new Date();
+  const tzDate=new Date(now.toLocaleString('en-US',{timeZone:currentTZ}));
+  const today=tzDate.getDate(),month=tzDate.getMonth(),year=tzDate.getFullYear();
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dayLabels=['S','M','T','W','T','F','S'];
+  let html=`<div class="cal-header"><div class="cal-month">${monthNames[month]} ${year}</div></div><div class="cal-grid">`;
+  dayLabels.forEach(d=>html+=`<div class="cal-day-lbl">${d}</div>`);
+  for(let i=0;i<firstDay;i++) html+=`<div class="cal-day cal-dim"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    html+=d===today?`<div class="cal-day"><div class="cal-today">${d}</div></div>`:`<div class="cal-day">${d}</div>`;
+  }
+  html+=`</div>`;
+  cal.innerHTML=html;
+}
+
+updateClock();buildCalendar();
+setInterval(updateClock,1000);setInterval(buildCalendar,60000);
+
+// ── RUBRIC PARSER ─────────────────────────────────────────────
 function parseRubricMarkdown(text){
   const lines=text.split('\n');
   const clusters=[];
@@ -653,8 +787,7 @@ function parseRubricMarkdown(text){
     curCluster=null;
   }
   for(let i=0;i<lines.length;i++){
-    const line=lines[i];
-    const trimmed=line.trim();
+    const line=lines[i],trimmed=line.trim();
     if(!trimmed) continue;
     if(/^####\s+/.test(line)&&!/^#####/.test(line)){
       saveCluster();
@@ -700,17 +833,9 @@ function levelFromText(t){
   if(/level\s*4|score\s*4|mastery/i.test(t)) return 3;
   return -1;
 }
-function detectLevel(l){return levelFromText(l);}
-
-function handleFile(input){
-  file=input.files[0];
-  document.getElementById('file-name').textContent=file?'Selected: '+file.name:'';
-  document.getElementById('run-btn').disabled=!file;
-}
 
 function handleRubric(input){
-  rubricFile=input.files[0];
-  if(!rubricFile) return;
+  rubricFile=input.files[0];if(!rubricFile)return;
   document.getElementById('rubric-name').textContent='Selected: '+rubricFile.name;
   const reader=new FileReader();
   reader.onload=e=>{
@@ -719,14 +844,187 @@ function handleRubric(input){
     if(totalParsed>=3) parsedRubric=parsed;
     const totalInds=parsedRubric.reduce((a,c)=>a+c.inds.length,0);
     document.getElementById('rubric-status-title').textContent=rubricFile.name+' loaded ✓';
-    document.getElementById('rubric-status-sub').textContent=
-      (parsedRubric.length||'—')+' clusters · '+totalInds+' indicators · Ready for evaluation';
-    toast(rubricFile.name+' ready. Now upload transcripts.','ok');
+    document.getElementById('rubric-status-sub').textContent=parsedRubric.length+' clusters · '+totalInds+' indicators · Ready for evaluation';
+    toast(rubricFile.name+' loaded. Select indicators and upload transcripts.','ok');
     renderRubric();
+    renderIndicatorCheckboxes();
   };
   reader.readAsText(rubricFile);
 }
 
+function renderRubric(){
+  const el=document.getElementById('rubric-content');
+  if(!parsedRubric.length){
+    el.innerHTML=`<div class="rubric-empty"><h3>Upload a rubric to see the framework</h3><p>Any markdown rubric will be parsed here automatically.</p></div>`;
+    return;
+  }
+  el.innerHTML=parsedRubric.map(c=>`
+    <div class="rubric-cluster">
+      <div class="cluster-head"><div class="cluster-title">${c.cluster}</div><div class="cluster-meta">${c.session} · ${c.inds.length} indicator${c.inds.length!==1?'s':''}</div></div>
+      ${c.inds.map(ind=>`
+        <div class="rubric-ind">
+          <div class="rubric-ind-header" onclick="toggleRubricInd(this)">
+            <div class="rind-header"><span class="rind-id">${ind.id}</span><span class="rind-name">${ind.name}</span></div>
+            <span class="rind-toggle">▼</span>
+          </div>
+          <div class="rubric-ind-body">
+            <div class="levels-grid">
+              ${['Beginning','Developing','Applying','Mastery'].map((l,i)=>`
+                <div class="level-box"><div class="level-lbl"><span class="level-num">${i+1}</span>${l}</div><div class="level-txt">${ind.ls[i]||'No descriptor provided.'}</div></div>`).join('')}
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function toggleRubricInd(header){
+  const body=header.nextElementSibling;
+  const toggle=header.querySelector('.rind-toggle');
+  body.classList.toggle('open',!body.classList.contains('open'));
+  toggle.classList.toggle('open',body.classList.contains('open'));
+}
+
+// ── INDICATOR CHECKBOXES ──────────────────────────────────────
+function renderIndicatorCheckboxes(){
+  const allInds=[...U_IND,...C_IND];
+  selectedInds=new Set(allInds);
+  document.getElementById('ind-checkboxes').innerHTML=`
+    <div class="ind-checkbox-section">
+      <div class="ind-checkbox-header">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;">Select Indicators for Evaluation</div>
+          <div style="font-size:11px;color:var(--muted);" id="ind-count-lbl">${allInds.length} of ${allInds.length} selected</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="selectAllInds(true)">Select All</button>
+          <button class="btn btn-ghost btn-sm" onclick="selectAllInds(false)">Deselect All</button>
+        </div>
+      </div>
+      <div class="ind-grid">
+        <div>
+          <div class="ind-group-label">User Interview</div>
+          ${U_IND.map(ind=>`
+            <label class="ind-check-label">
+              <input type="checkbox" id="chk-${ind}" checked onchange="toggleIndSel('${ind}')"/>
+              <span><strong style="color:var(--accent);font-size:10px;">${ind}</strong> — ${DESC[ind]||ind}</span>
+            </label>`).join('')}
+        </div>
+        <div>
+          <div class="ind-group-label">Client Conversation</div>
+          ${C_IND.map(ind=>`
+            <label class="ind-check-label">
+              <input type="checkbox" id="chk-${ind}" checked onchange="toggleIndSel('${ind}')"/>
+              <span><strong style="color:var(--accent);font-size:10px;">${ind}</strong> — ${DESC[ind]||ind}</span>
+            </label>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleIndSel(ind){
+  if(selectedInds.has(ind)) selectedInds.delete(ind);
+  else selectedInds.add(ind);
+  updateIndCount();
+}
+function selectAllInds(val){
+  [...U_IND,...C_IND].forEach(ind=>{
+    if(val) selectedInds.add(ind); else selectedInds.delete(ind);
+    const chk=document.getElementById('chk-'+ind);
+    if(chk) chk.checked=val;
+  });
+  updateIndCount();
+}
+function updateIndCount(){
+  const el=document.getElementById('ind-count-lbl');
+  if(el) el.textContent=`${selectedInds.size} of ${U_IND.length+C_IND.length} selected`;
+}
+
+// ── FILE UPLOAD + COLUMN DETECTION ───────────────────────────
+async function handleFile(input){
+  file=input.files[0];if(!file)return;
+  document.getElementById('file-name').textContent='Selected: '+file.name;
+  document.getElementById('run-btn').disabled=true;
+  colMappingConfirmed=false;
+
+  try{
+    const fd=new FormData();fd.append('file',file);
+    const r=await fetch(`${API}/api/detect-columns`,{method:'POST',body:fd});
+    const d=await r.json();
+    if(d.status==='success'){
+      detectedColumns=d.columns||[];
+      columnMapping=d.suggested_mapping||{};
+      csvSample=d.sample||{};
+      // Show mapping banner
+      const banner=document.getElementById('col-mapping-banner');
+      if(banner) banner.style.display='flex';
+      document.getElementById('col-banner-title').textContent=`${detectedColumns.length} columns detected · ${d.total_rows} rows`;
+      document.getElementById('col-banner-sub').textContent='Auto-mapped. Click "Edit Mapping" to review or adjust before running.';
+      colMappingConfirmed=true;
+      document.getElementById('run-btn').disabled=false;
+      toast('File ready. '+d.total_rows+' rows detected.','ok');
+    } else {
+      // No backend or error — allow upload anyway
+      colMappingConfirmed=true;
+      document.getElementById('run-btn').disabled=false;
+    }
+  }catch(e){
+    // Backend not running or detect endpoint not available — allow upload
+    colMappingConfirmed=true;
+    document.getElementById('run-btn').disabled=false;
+    document.getElementById('file-name').textContent='Selected: '+file.name;
+  }
+}
+
+function openColModal(){
+  const rows=document.getElementById('col-map-rows');
+  const stdFields=[
+    {key:'participant_id',label:'Student / Participant ID',required:true},
+    {key:'simulation',label:'Simulation / Course Name',required:false},
+    {key:'completed_user',label:'Completion Status',required:false},
+    {key:'transcript_user',label:'User Interview Transcript',required:true},
+    {key:'transcript_client',label:'Client Conversation Transcript',required:false},
+    {key:'duration_seconds_user',label:'User Interview Duration',required:false},
+    {key:'duration_seconds_client',label:'Client Conversation Duration',required:false},
+  ];
+  rows.innerHTML=stdFields.map(f=>{
+    const currentVal=columnMapping[f.key]||'';
+    const sample=currentVal&&csvSample[currentVal]?csvSample[currentVal]:'';
+    const opts=detectedColumns.map(c=>`<option value="${c}" ${c===currentVal?'selected':''}>${c}</option>`).join('');
+    return`<div class="col-map-row">
+      <div>
+        <div class="col-map-label">${f.label}${f.required?' <span style="color:var(--red)">*</span>':''}</div>
+      </div>
+      <div class="col-map-arrow">→</div>
+      <div>
+        <select class="col-map-select" id="cmap-${f.key}">
+          <option value="">-- Not in file --</option>
+          ${opts}
+        </select>
+        <div class="col-sample">${sample?'e.g. "'+sample+'"':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('col-modal').classList.add('open');
+}
+
+function closeColModal(){document.getElementById('col-modal').classList.remove('open');}
+
+function confirmColMapping(){
+  const stdFields=['participant_id','simulation','completed_user','transcript_user','transcript_client','duration_seconds_user','duration_seconds_client'];
+  const newMap={};
+  stdFields.forEach(f=>{
+    const sel=document.getElementById('cmap-'+f);
+    if(sel&&sel.value) newMap[f]=sel.value;
+  });
+  columnMapping=newMap;
+  colMappingConfirmed=true;
+  closeColModal();
+  document.getElementById('col-banner-title').textContent='Column mapping confirmed ✓';
+  document.getElementById('col-banner-sub').textContent='Ready to run evaluation with your custom mapping.';
+  toast('Column mapping saved.','ok');
+}
+
+// ── EVALUATION ────────────────────────────────────────────────
 async function runEval(){
   if(!file) return;
   const pw=document.getElementById('progress-wrap'),pb=document.getElementById('prog-bar'),
@@ -736,8 +1034,10 @@ async function runEval(){
   const fd=new FormData();
   fd.append('file',file);
   if(rubricFile) fd.append('rubric',rubricFile);
+  if(Object.keys(columnMapping).length>0) fd.append('column_mapping',JSON.stringify(columnMapping));
+  if(selectedInds.size>0) fd.append('selected_indicators',JSON.stringify([...selectedInds]));
   try{
-    pb.style.width='20%';ps.textContent='Evaluating with AI — this may take 1–3 minutes.';
+    pb.style.width='20%';ps.textContent='Evaluating with AI — this may take a few minutes.';
     let p=20;const t=setInterval(()=>{if(p<88){p+=1.5;pb.style.width=p+'%';}},1500);
     const r=await fetch(`${API}/api/evaluate`,{method:'POST',body:fd});
     clearInterval(t);
@@ -748,6 +1048,9 @@ async function runEval(){
     ps.textContent='Done. '+results.length+' students evaluated.';
     document.getElementById('btn-csv').disabled=false;
     document.getElementById('btn-pdf').disabled=false;
+    const badge=document.getElementById('nav-count');
+    if(badge){badge.textContent=results.length;badge.style.display='inline';}
+    cohortSummary='';
     setTimeout(()=>{showPage('overview');renderOv();},700);
   }catch(e){
     pb.style.width='0%';ps.textContent='Error: '+e.message;
@@ -755,6 +1058,7 @@ async function runEval(){
   }
 }
 
+// ── HELPERS ───────────────────────────────────────────────────
 function scColor(v){
   if(!v&&v!==0) return'var(--subtle)';
   if(v>=3.5) return'var(--green)';
@@ -773,7 +1077,7 @@ function isFlagged(st){
 }
 
 function renderOv(){
-  if(!results.length) return;
+  if(!results.length)return;
   const tot=results.length,comp=results.filter(s=>s.completed===1).length;
   const fl=results.filter(isFlagged).length;
   const cv=results.map(s=>s.comm_user).filter(v=>v!=null);
@@ -781,7 +1085,7 @@ function renderOv(){
   document.getElementById('stats-row').innerHTML=`
     <div class="stat-card"><div class="stat-label">Total Students</div><div class="stat-value">${tot}</div><div class="stat-meta">Evaluated</div></div>
     <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value">${comp}</div><div class="stat-meta">Both sessions</div></div>
-    <div class="stat-card"><div class="stat-label">Avg User Interview Comm</div><div class="stat-value">${avg}</div><div class="stat-meta">Score out of 4</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Comm Score</div><div class="stat-value">${avg}</div><div class="stat-meta">User Interview</div></div>
     <div class="stat-card"><div class="stat-label">Flagged</div><div class="stat-value">${fl}</div><div class="stat-meta">For review</div></div>`;
   document.getElementById('tbl-meta').textContent=[...new Set(results.map(s=>s.simulation))].join(', ')+' · '+tot+' students';
   document.getElementById('ov-empty').style.display='none';
@@ -790,22 +1094,31 @@ function renderOv(){
 }
 
 function renderTbl(data){
-  const inds=sess==='user'?U_IND:C_IND;
+  const inds=(sess==='user'?U_IND:C_IND).filter(i=>selectedInds.has(i));
   const ck=sess==='user'?'comm_user':'comm_client';
   const tk=sess==='user'?'ct_user':'ct_client';
   const sfx=sess==='user'?'_user':'_client';
   document.getElementById('tbl-title').textContent='Class Overview — '+(sess==='user'?'User Interview':'Client Conversation');
-  document.getElementById('tbl-head').innerHTML=`<tr><th>Student ID</th><th>Simulation</th><th>Completed</th>${inds.map(i=>`<th title="${DESC[i]||i}">${i}</th>`).join('')}<th>Comm</th><th>CT</th><th>Status</th></tr>`;
+  document.getElementById('tbl-head').innerHTML=`<tr>
+    <th>Student ID</th><th>Simulation</th><th>Done</th>
+    ${inds.map(i=>`<th title="${DESC[i]||i}">${i}</th>`).join('')}
+    <th>Comm</th><th>CT</th><th>Status</th><th>Download</th></tr>`;
   document.getElementById('tbl-body').innerHTML=data.map(s=>{
     const cm=s[ck],ct=s[tk],fl=isFlagged(s);
-    return`<tr onclick="openModal('${s.participant_id}')">
-      <td class="id-cell">${s.participant_id}</td>
-      <td><span class="sim-pill">${s.simulation}</span></td>
+    return`<tr>
+      <td class="id-cell" onclick="openModal('${s.participant_id}')">${s.participant_id}</td>
+      <td onclick="openModal('${s.participant_id}')" style="cursor:pointer"><span class="sim-pill">${s.simulation}</span></td>
       <td class="${s.completed?'comp-y':'comp-n'}">${s.completed?'Yes':'No'}</td>
       ${inds.map(k=>`<td style="text-align:center">${bdg(s[k+sfx+'_score'])}</td>`).join('')}
       <td class="sc" style="color:${scColor(cm)}">${cm??'—'}</td>
       <td class="sc" style="color:${scColor(ct)}">${ct??'—'}</td>
-      <td>${fl?`<span class="st-flag">Flagged</span>`:s.completed===0?`<span class="st-inc">Incomplete</span>`:`<span class="st-ok">Clear</span>`}</td>
+      <td>${fl?`<span class="st-flag">⚠ Flag</span>`:s.completed===0?`<span class="st-inc">Incomplete</span>`:`<span class="st-ok">Clear</span>`}</td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-ghost btn-sm" onclick="downloadStudentCSV('${s.participant_id}')">CSV</button>
+          <button class="btn btn-ghost btn-sm" onclick="downloadStudentPDF('${s.participant_id}')">PDF</button>
+        </div>
+      </td>
     </tr>`;}).join('');
 }
 
@@ -819,30 +1132,37 @@ function filterTbl(q){
   renderTbl(results.filter(s=>s.participant_id.toLowerCase().includes(q.toLowerCase())||s.simulation.toLowerCase().includes(q.toLowerCase())));
 }
 
+// ── STUDENT MODAL ─────────────────────────────────────────────
 function openModal(pid){
+  currentPid=pid;
   const s=results.find(x=>x.participant_id===pid);if(!s)return;
   document.getElementById('m-id').textContent=s.participant_id;
   document.getElementById('m-sim').textContent=s.simulation.replace(/_/g,' ');
   document.getElementById('m-comp').innerHTML=s.completed?`<span class="comp-y">Completed both sessions</span>`:`<span class="comp-n">Session incomplete</span>`;
   document.getElementById('m-stats').innerHTML=`
-    <div class="m-stat"><div class="m-val" style="color:${scColor(s.comm_user)}">${s.comm_user??'N/A'}</div><div class="m-lbl">User Interview Comm</div></div>
-    <div class="m-stat"><div class="m-val" style="color:${scColor(s.ct_user)}">${s.ct_user??'N/A'}</div><div class="m-lbl">User Interview CT</div></div>
-    <div class="m-stat"><div class="m-val" style="color:${scColor(s.comm_client)}">${s.comm_client??'N/A'}</div><div class="m-lbl">Client Conv Comm</div></div>
-    <div class="m-stat"><div class="m-val" style="color:${scColor(s.ct_client)}">${s.ct_client??'N/A'}</div><div class="m-lbl">Client Conv CT</div></div>`;
+    <div class="m-stat"><div class="m-val" style="color:${scColor(s.comm_user)}">${s.comm_user??'N/A'}</div><div class="m-lbl">User Comm</div></div>
+    <div class="m-stat"><div class="m-val" style="color:${scColor(s.ct_user)}">${s.ct_user??'N/A'}</div><div class="m-lbl">User CT</div></div>
+    <div class="m-stat"><div class="m-val" style="color:${scColor(s.comm_client)}">${s.comm_client??'N/A'}</div><div class="m-lbl">Client Comm</div></div>
+    <div class="m-stat"><div class="m-val" style="color:${scColor(s.ct_client)}">${s.ct_client??'N/A'}</div><div class="m-lbl">Client CT</div></div>`;
   const det=s._detail||{};
   function sec(k,inds,label){
     const sd=det[k];
     if(!sd) return`<p style="font-size:12px;color:var(--subtle);padding:8px 0">No ${label} data.</p>`;
-    return inds.map(i=>{
+    const summary=sd.summary;
+    let html=summary?`<div style="font-size:12px;color:var(--muted);line-height:1.7;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;">${summary}</div>`:'';
+    html+=inds.map(i=>{
       const item=sd.scores?.[i]||{},n=item.score??0;
       const segs=[1,2,3,4].map(x=>`<div class="lv-seg seg${x}${n>=x?' on':''}"></div>`).join('');
+      const feedback=item.feedback||'';
       return`<div class="ind-row">
         <div class="ind-top"><span class="ind-key">${i}</span>${bdg(n)}</div>
         <div class="ind-desc">${DESC[i]||i}</div>
         <div class="ind-rat">${item.rationale||'No rationale available.'}</div>
+        ${feedback?`<div class="ind-feedback">💡 ${feedback}</div>`:''}
         ${(item.quotes||[]).slice(0,2).map(q=>`<div class="ind-q">"${q}"</div>`).join('')}
         <div class="lv-bar">${segs}</div>
       </div>`;}).join('');
+    return html;
   }
   document.getElementById('m-user').innerHTML=`<div class="sec-ttl">User Interview Indicators</div>${sec('user',U_IND,'User Interview')}`;
   document.getElementById('m-client').innerHTML=`<div class="sec-ttl">Client Conversation Indicators</div>${sec('client',C_IND,'Client Conversation')}`;
@@ -850,6 +1170,90 @@ function openModal(pid){
 }
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 
+// ── PER-STUDENT DOWNLOADS ─────────────────────────────────────
+function downloadStudentCSV(pid){
+  const s=results.find(x=>x.participant_id===pid);if(!s)return;
+  const allInds=[...U_IND,...C_IND];
+  let csv='Participant ID,Simulation,Completed,Session,Indicator,Description,Score,Level,Rationale,Feedback\n';
+  allInds.forEach(ind=>{
+    const isUser=U_IND.includes(ind);
+    const sfx=isUser?'_user':'_client';
+    const sessLabel=isUser?'User Interview':'Client Conversation';
+    const score=s[`${ind}${sfx}_score`]??'N/A';
+    const level=score===1?'Beginning':score===2?'Developing':score===3?'Applying':score===4?'Mastery':'N/A';
+    const detail=s._detail?.[isUser?'user':'client']?.scores?.[ind]||{};
+    const rationale=(detail.rationale||'').replace(/"/g,"'");
+    const feedback=(detail.feedback||'').replace(/"/g,"'");
+    csv+=`${s.participant_id},${s.simulation},${s.completed?'Yes':'No'},${sessLabel},"${DESC[ind]||ind}",${score},${level},"${rationale}","${feedback}"\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`${pid}_rubricai_report.csv`;a.click();
+  toast('CSV downloaded for '+pid,'ok');
+}
+
+function downloadStudentPDF(pid){
+  const s=results.find(x=>x.participant_id===pid);if(!s)return;
+  const allInds=[...U_IND,...C_IND];
+  const w=window.open('','_blank');
+  const rows=allInds.map(ind=>{
+    const isUser=U_IND.includes(ind);
+    const sfx=isUser?'_user':'_client';
+    const sessLabel=isUser?'User Interview':'Client Conversation';
+    const score=s[`${ind}${sfx}_score`]??'N/A';
+    const level=score===1?'Beginning':score===2?'Developing':score===3?'Applying':score===4?'Mastery':'N/A';
+    const detail=s._detail?.[isUser?'user':'client']?.scores?.[ind]||{};
+    const feedback=detail.feedback||'';
+    const rationale=detail.rationale||'';
+    const color=score>=4?'#059669':score>=3?'#d97706':score>=2?'#ea580c':'#dc2626';
+    return`<tr>
+      <td>${DESC[ind]||ind}</td>
+      <td>${sessLabel}</td>
+      <td style="color:${color};font-weight:700;text-align:center;">${score}</td>
+      <td style="color:${color};">${level}</td>
+      <td style="font-size:11px;color:#475569;">${rationale}</td>
+      <td style="font-size:11px;color:#059669;">${feedback}</td>
+    </tr>`;
+  }).join('');
+  w.document.write(`<!DOCTYPE html><html><head><title>${pid} — RubricAI Report</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:32px;color:#0f172a;font-size:13px;}
+    h1{color:#3b82f6;font-size:20px;margin-bottom:4px;}
+    .meta{font-size:12px;color:#64748b;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #e2e8f0;}
+    .scores{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+    .score-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;}
+    .score-val{font-size:24px;font-weight:800;color:#3b82f6;}
+    .score-lbl{font-size:10px;color:#94a3b8;text-transform:uppercase;margin-top:4px;}
+    table{width:100%;border-collapse:collapse;font-size:11px;}
+    th{background:#f1f5f9;padding:8px 10px;text-align:left;border:1px solid #e2e8f0;font-size:10px;text-transform:uppercase;}
+    td{padding:8px 10px;border:1px solid #e2e8f0;vertical-align:top;}
+    .footer{margin-top:24px;font-size:10px;color:#94a3b8;text-align:center;}
+  </style></head>
+  <body>
+  <h1>RubricAI — Student Evaluation Report</h1>
+  <div class="meta">
+    <strong>Student ID:</strong> ${pid} &nbsp;&nbsp;
+    <strong>Simulation:</strong> ${s.simulation} &nbsp;&nbsp;
+    <strong>Status:</strong> ${s.completed?'Completed':'Incomplete'} &nbsp;&nbsp;
+    <strong>Date:</strong> ${new Date().toLocaleDateString()}
+  </div>
+  <div class="scores">
+    <div class="score-box"><div class="score-val">${s.comm_user??'N/A'}</div><div class="score-lbl">User Interview Comm</div></div>
+    <div class="score-box"><div class="score-val">${s.ct_user??'N/A'}</div><div class="score-lbl">User Interview CT</div></div>
+    <div class="score-box"><div class="score-val">${s.comm_client??'N/A'}</div><div class="score-lbl">Client Conv Comm</div></div>
+    <div class="score-box"><div class="score-val">${s.ct_client??'N/A'}</div><div class="score-lbl">Client Conv CT</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Indicator</th><th>Session</th><th>Score</th><th>Level</th><th>Rationale</th><th style="color:#059669;">Feedback</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">Generated by RubricAI v2 · CPS LEARN Lab · Northeastern University</div>
+  </body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),500);
+}
+
+// ── SUMMARY & CHARTS ──────────────────────────────────────────
 function switchDash(panel,btn){
   document.querySelectorAll('.dash-tab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.dash-panel').forEach(p=>p.classList.remove('active'));
@@ -858,7 +1262,7 @@ function switchDash(panel,btn){
 }
 
 function hbarChart(inds,sfx){
-  return inds.map(ind=>{
+  return inds.filter(i=>selectedInds.has(i)).map(ind=>{
     const name=DESC[ind]||ind;
     const vs=results.map(s=>s[`${ind}${sfx}_score`]).filter(v=>v&&v>0);
     const av=vs.length?(vs.reduce((a,b)=>a+b,0)/vs.length):0;
@@ -876,24 +1280,20 @@ function hbarChart(inds,sfx){
 }
 
 function donutChart(comp,inc){
-  const total=comp+inc;if(!total) return'';
-  const r=60,cx=80,cy=80,stroke=22;
-  const circ=2*Math.PI*r;
-  const compPct=comp/total;
-  const compDash=circ*compPct;
+  const total=comp+inc;if(!total)return'';
+  const r=60,cx=80,cy=80,stroke=22,circ=2*Math.PI*r;
+  const compDash=circ*(comp/total);
   return`<svg viewBox="0 0 160 160" width="160" height="160">
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="${stroke}"/>
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#3b82f6" stroke-width="${stroke}"
-      stroke-dasharray="${compDash} ${circ}" stroke-dashoffset="${circ*0.25}" stroke-linecap="round"/>
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#ef4444" stroke-width="${stroke}"
-      stroke-dasharray="${circ-compDash} ${circ}" stroke-dashoffset="${circ*0.25-compDash}" stroke-linecap="round" opacity="0.7"/>
-    <text x="${cx}" y="${cy-6}" text-anchor="middle" fill="var(--text)" font-size="20" font-weight="800" font-family="Inter">${Math.round(compPct*100)}%</text>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#3b82f6" stroke-width="${stroke}" stroke-dasharray="${compDash} ${circ}" stroke-dashoffset="${circ*0.25}" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#ef4444" stroke-width="${stroke}" stroke-dasharray="${circ-compDash} ${circ}" stroke-dashoffset="${circ*0.25-compDash}" stroke-linecap="round" opacity="0.7"/>
+    <text x="${cx}" y="${cy-6}" text-anchor="middle" fill="var(--text)" font-size="20" font-weight="800" font-family="Inter">${Math.round(comp/total*100)}%</text>
     <text x="${cx}" y="${cy+14}" text-anchor="middle" fill="var(--subtle)" font-size="10" font-family="Inter">Completed</text>
   </svg>`;
 }
 
 function renderSum(){
-  if(!results.length) return;
+  if(!results.length)return;
   document.getElementById('sum-empty').style.display='none';
   document.getElementById('sum-content').style.display='block';
   const tot=results.length,comp=results.filter(s=>s.completed===1).length,inc=tot-comp;
@@ -920,21 +1320,21 @@ function renderSum(){
     <div class="kpi-row">
       <div class="kpi-card"><div class="kpi-label">Avg User Interview Comm</div><div class="kpi-val" style="color:${scColor(parseFloat(avgCU))}">${avgCU}</div><span class="kpi-badge kpi-neutral">out of 4</span></div>
       <div class="kpi-card"><div class="kpi-label">Avg User Interview CT</div><div class="kpi-val" style="color:${scColor(parseFloat(avgCTU))}">${avgCTU}</div><span class="kpi-badge kpi-neutral">out of 4</span></div>
-      <div class="kpi-card"><div class="kpi-label">Completion Rate</div><div class="kpi-val">${compRate}%</div><span class="kpi-badge ${compRate>=80?'kpi-up':'kpi-down'}">${comp} of ${tot} students</span></div>
+      <div class="kpi-card"><div class="kpi-label">Completion Rate</div><div class="kpi-val">${compRate}%</div><span class="kpi-badge ${compRate>=80?'kpi-up':'kpi-down'}">${comp} of ${tot}</span></div>
       <div class="kpi-card"><div class="kpi-label">Flagged for Review</div><div class="kpi-val" style="color:${fl>0?'var(--red)':'var(--green)'}">${fl}</div><span class="kpi-badge ${fl>0?'kpi-down':'kpi-up'}">${Math.round(fl/tot*100)}% of class</span></div>
     </div>
     <div class="charts-2col">
       <div class="chart-card">
         <div class="chart-ttl">Score Distribution Across All Indicators</div>
-        <div style="display:flex;align-items:flex-end;gap:16px;height:160px;padding:0 8px 32px;position:relative;margin-top:8px;">
-          <div style="position:absolute;bottom:32px;left:0;right:0;height:1px;background:var(--border);"></div>
+        <div style="display:flex;align-items:flex-end;gap:16px;height:140px;padding:0 8px 28px;position:relative;margin-top:12px;">
+          <div style="position:absolute;bottom:28px;left:0;right:0;height:1px;background:var(--border);"></div>
           ${['Beginning','Developing','Applying','Mastery'].map((l,i)=>{
             const cols=['var(--red)','var(--orange)','var(--amber)','var(--green)'];
             const pct=Math.max((dist[i]/maxD)*100,3);
-            return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;">
-              <div style="font-size:15px;font-weight:800;color:var(--text)">${dist[i]}</div>
-              <div style="width:100%;height:${pct}%;background:${cols[i]};border-radius:6px 6px 0 0;min-height:6px;opacity:0.9;transition:height .5s ease;"></div>
-              <div style="position:absolute;bottom:8px;font-size:11px;font-weight:600;color:var(--muted)">${l}</div>
+            return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;">
+              <div style="font-size:13px;font-weight:800;color:var(--text)">${dist[i]}</div>
+              <div style="width:100%;height:${pct}%;background:${cols[i]};border-radius:6px 6px 0 0;min-height:6px;"></div>
+              <div style="font-size:10px;font-weight:600;color:var(--muted);position:absolute;bottom:6px;">${l}</div>
             </div>`;
           }).join('')}
         </div>
@@ -955,19 +1355,27 @@ function renderSum(){
     <div class="kpi-row">
       <div class="kpi-card"><div class="kpi-label">Avg Communication</div><div class="kpi-val" style="color:${scColor(parseFloat(avgCU))}">${avgCU}</div><span class="kpi-badge kpi-neutral">User Interview</span></div>
       <div class="kpi-card"><div class="kpi-label">Avg Critical Thinking</div><div class="kpi-val" style="color:${scColor(parseFloat(avgCTU))}">${avgCTU}</div><span class="kpi-badge kpi-neutral">User Interview</span></div>
-      <div class="kpi-card"><div class="kpi-label">Indicators Scored</div><div class="kpi-val">${U_IND.length}</div><span class="kpi-badge kpi-neutral">indicators</span></div>
+      <div class="kpi-card"><div class="kpi-label">Indicators Selected</div><div class="kpi-val">${U_IND.filter(i=>selectedInds.has(i)).length}</div><span class="kpi-badge kpi-neutral">of ${U_IND.length}</span></div>
       <div class="kpi-card"><div class="kpi-label">Students Evaluated</div><div class="kpi-val">${results.filter(s=>s.comm_user!=null).length}</div><span class="kpi-badge kpi-neutral">of ${tot}</span></div>
     </div>
-    <div class="chart-card"><div class="chart-ttl">Average Score per Indicator — User Interview</div><div class="chart-sub">Full indicator names · Scored 1–4 · Color coded by level</div><div class="hbar-list">${hbarChart(U_IND,'_user')}</div></div>`;
+    <div class="chart-card">
+      <div class="chart-ttl">Average Score per Indicator — User Interview</div>
+      <div class="chart-sub">Full indicator names · Scored 1–4 · Color coded by level</div>
+      <div class="hbar-list">${hbarChart(U_IND,'_user')}</div>
+    </div>`;
 
   document.getElementById('dash-client').innerHTML=`
     <div class="kpi-row">
       <div class="kpi-card"><div class="kpi-label">Avg Communication</div><div class="kpi-val" style="color:${scColor(parseFloat(avgCC))}">${avgCC}</div><span class="kpi-badge kpi-neutral">Client Conversation</span></div>
       <div class="kpi-card"><div class="kpi-label">Avg Critical Thinking</div><div class="kpi-val" style="color:${scColor(parseFloat(avgCTC))}">${avgCTC}</div><span class="kpi-badge kpi-neutral">Client Conversation</span></div>
-      <div class="kpi-card"><div class="kpi-label">Indicators Scored</div><div class="kpi-val">${C_IND.length}</div><span class="kpi-badge kpi-neutral">indicators</span></div>
+      <div class="kpi-card"><div class="kpi-label">Indicators Selected</div><div class="kpi-val">${C_IND.filter(i=>selectedInds.has(i)).length}</div><span class="kpi-badge kpi-neutral">of ${C_IND.length}</span></div>
       <div class="kpi-card"><div class="kpi-label">Students Evaluated</div><div class="kpi-val">${results.filter(s=>s.comm_client!=null).length}</div><span class="kpi-badge kpi-neutral">of ${tot}</span></div>
     </div>
-    <div class="chart-card"><div class="chart-ttl">Average Score per Indicator — Client Conversation</div><div class="chart-sub">Full indicator names · Scored 1–4 · Color coded by level</div><div class="hbar-list">${hbarChart(C_IND,'_client')}</div></div>`;
+    <div class="chart-card">
+      <div class="chart-ttl">Average Score per Indicator — Client Conversation</div>
+      <div class="chart-sub">Full indicator names · Scored 1–4 · Color coded by level</div>
+      <div class="hbar-list">${hbarChart(C_IND,'_client')}</div>
+    </div>`;
 
   const ranked=[...results].sort((a,b)=>{
     const sa=(a.comm_user??0)+(a.ct_user??0)+(a.comm_client??0)+(a.ct_client??0);
@@ -976,29 +1384,63 @@ function renderSum(){
   });
   document.getElementById('dash-students').innerHTML=`
     <div class="charts-2col">
-      <div class="chart-card"><div class="chart-ttl">Student Rankings by Total Score</div>
+      <div class="chart-card">
+        <div class="chart-ttl">Student Rankings by Total Score</div>
         <div class="rank-list">${ranked.map((s,i)=>{
           const total=((s.comm_user??0)+(s.ct_user??0)+(s.comm_client??0)+(s.ct_client??0));
           const avg=(total/4).toFixed(2);
-          return`<div class="rank-item"><div class="rank-num">${i+1}</div><div class="rank-id">${s.participant_id}</div><div class="rank-sim">${s.simulation}</div><div class="rank-score" style="color:${scColor(parseFloat(avg))}">${avg}</div></div>`;
-        }).join('')}</div>
+          return`<div class="rank-item" style="cursor:pointer;" onclick="openModal('${s.participant_id}')">
+            <div class="rank-num">${i+1}</div>
+            <div class="rank-id">${s.participant_id}</div>
+            <div class="rank-sim">${s.simulation}</div>
+            <div class="rank-score" style="color:${scColor(parseFloat(avg))}">${avg}</div>
+          </div>`;}).join('')}
+        </div>
       </div>
-      <div class="chart-card"><div class="chart-ttl">Flagged Students</div>
+      <div class="chart-card">
+        <div class="chart-ttl">Flagged Students</div>
         <div class="rank-list">${ranked.filter(isFlagged).map(s=>`
-          <div class="rank-item" style="border-color:rgba(239,68,68,.3)"><div class="rank-id">${s.participant_id}</div><div class="rank-sim">${s.simulation}</div><div class="rank-score" style="color:var(--red)">⚠ Review</div></div>`).join('')||`<p style="font-size:13px;color:var(--subtle);padding:12px">No flagged students.</p>`}
+          <div class="rank-item" style="border-color:rgba(239,68,68,.3);cursor:pointer;" onclick="openModal('${s.participant_id}')">
+            <div class="rank-id">${s.participant_id}</div>
+            <div class="rank-sim">${s.simulation}</div>
+            <div class="rank-score" style="color:var(--red)">⚠ Review</div>
+          </div>`).join('')||`<p style="font-size:13px;color:var(--subtle);padding:12px">No flagged students.</p>`}
         </div>
       </div>
     </div>`;
 }
 
+// ── COHORT SUMMARY ────────────────────────────────────────────
+async function generateCohortSummary(){
+  if(!results.length)return;
+  const el=document.getElementById('cohort-summary-text');
+  if(el) el.textContent='Generating AI cohort summary...';
+  const commU=results.map(s=>s.comm_user).filter(v=>v!=null);
+  const ctU=results.map(s=>s.ct_user).filter(v=>v!=null);
+  const fl=results.filter(isFlagged).length;
+  const avgCU=commU.length?(commU.reduce((a,b)=>a+b,0)/commU.length).toFixed(2):'N/A';
+  const avgCTU=ctU.length?(ctU.reduce((a,b)=>a+b,0)/ctU.length).toFixed(2):'N/A';
+  const prompt=`Write a 3-4 sentence cohort summary for an instructor. ${results.length} students evaluated. Average User Interview Communication: ${avgCU}/4.0. Average Critical Thinking: ${avgCTU}/4.0. ${fl} students flagged. Simulations: ${[...new Set(results.map(s=>s.simulation))].join(', ')}. Be specific, constructive, and actionable. Mention strengths and areas needing support.`;
+  try{
+    const r=await fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({system:'You are an expert educational assessment consultant writing concise cohort summaries.',messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    cohortSummary=d.reply||'Unable to generate summary.';
+    if(el) el.textContent=cohortSummary;
+  }catch(e){
+    if(el) el.textContent='Could not generate summary. Make sure the backend is running.';
+  }
+}
+
+// ── AI ASSISTANT ──────────────────────────────────────────────
 async function sendChat(){
   const inp=document.getElementById('chat-input');
   const msg=inp.value.trim();if(!msg)return;
   inp.value='';addMsg('user',msg);chatHist.push({role:'user',content:msg});
   const bbl=addMsg('assistant','...');
   const sys=results.length
-    ?`You are an expert educational assessment assistant for RubricAI v2. Help instructors understand student performance.\n\nEvaluation data: ${JSON.stringify(results.map(s=>({id:s.participant_id,sim:s.simulation,completed:s.completed,comm_user:s.comm_user,ct_user:s.ct_user,comm_client:s.comm_client,ct_client:s.ct_client})))}\n\nScoring: 1=Beginning, 2=Developing, 3=Applying, 4=Mastery. Sessions are User Interview and Client Conversation.`
-    :`You are an expert educational assessment assistant for RubricAI v2. No evaluation data loaded yet. Tell the user to upload a rubric and transcript CSV first.`;
+    ?`You are an expert educational assessment assistant for RubricAI v2.\n\nData: ${JSON.stringify(results.map(s=>({id:s.participant_id,sim:s.simulation,completed:s.completed,comm_user:s.comm_user,ct_user:s.ct_user,comm_client:s.comm_client,ct_client:s.ct_client})))}\n\nScoring: 1=Beginning, 2=Developing, 3=Applying, 4=Mastery.`
+    :`You are RubricAI assistant. No evaluation data loaded yet. Ask the user to upload a rubric and transcript CSV first.`;
   try{
     const r=await fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys,messages:chatHist})});
     const d=await r.json();
@@ -1017,40 +1459,7 @@ function addMsg(role,text){
 function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
 function fillChat(t){document.getElementById('chat-input').value=t;}
 
-function renderRubric(){
-  const el=document.getElementById('rubric-content');
-  if(!parsedRubric.length){
-    el.innerHTML=`<div class="rubric-empty"><h3>Upload a rubric to see the framework</h3><p>Any markdown rubric with clusters, indicators, and level descriptors will be parsed and displayed here.</p></div>`;
-    return;
-  }
-  el.innerHTML=parsedRubric.map(c=>`
-    <div class="rubric-cluster">
-      <div class="cluster-head"><div class="cluster-title">${c.cluster}</div><div class="cluster-meta">${c.session} · ${c.inds.length} indicator${c.inds.length!==1?'s':''}</div></div>
-      ${c.inds.map(ind=>`
-        <div class="rubric-ind">
-          <div class="rubric-ind-header" onclick="toggleInd(this)">
-            <div class="rind-header"><span class="rind-id">${ind.id}</span><span class="rind-name">${ind.name}</span></div>
-            <span class="rind-toggle">▼</span>
-          </div>
-          <div class="rubric-ind-body">
-            <div class="levels-grid">
-              ${['Beginning','Developing','Applying','Mastery'].map((l,i)=>`
-                <div class="level-box">
-                  <div class="level-lbl"><span class="level-num">${i+1}</span>${l}</div>
-                  <div class="level-txt">${ind.ls[i]||'No descriptor provided.'}</div>
-                </div>`).join('')}
-            </div>
-          </div>
-        </div>`).join('')}
-    </div>`).join('');}
-
-function toggleInd(header){
-  const body=header.nextElementSibling;
-  const toggle=header.querySelector('.rind-toggle');
-  body.classList.toggle('open',!body.classList.contains('open'));
-  toggle.classList.toggle('open',body.classList.contains('open'));
-}
-
+// ── EXPORTS ───────────────────────────────────────────────────
 async function exportCSV(){
   if(!results.length){toast('No data to export.','err');return;}
   try{
@@ -1065,8 +1474,7 @@ async function exportCSV(){
 async function exportPDF(){
   if(!results.length){toast('No data to export.','err');return;}
   try{
-    const cl=results.map(({_detail,...r})=>r);
-    const r=await fetch(`${API}/api/export/pdf`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({students:cl})});
+    const r=await fetch(`${API}/api/export/pdf`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({students:results})});
     if(!r.ok) throw new Error('Export failed');
     const b=await r.blob();
     const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='rubricai_report.pdf';a.click();
@@ -1074,6 +1482,7 @@ async function exportPDF(){
   }catch(e){toast('PDF export failed: '+e.message,'err');}
 }
 
+// ── PAGE NAVIGATION ───────────────────────────────────────────
 function showPage(p){
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
@@ -1081,16 +1490,16 @@ function showPage(p){
   document.getElementById('nav-'+p)?.classList.add('active');
   const T={landing:'Home',rubric:'Rubric Framework',upload:'Upload Transcripts',overview:'Class Overview',summary:'Summary & Charts',assistant:'AI Assistant'};
   const S={
-    landing:'AI-powered student interview assessment — CPS LEARN Lab · Northeastern',
+    landing:'CPS LEARN Lab · Northeastern University',
     rubric:'Upload your rubric and view the full framework',
-    upload:'Upload your transcript CSV and run evaluation',
+    upload:'Upload any CSV — columns auto-detected',
     overview:results.length?results.length+' students evaluated':'No evaluation run yet',
     summary:results.length?'Performance insights and charts':'No evaluation run yet',
     assistant:'Ask questions about student results or the rubric'
   };
   document.getElementById('page-title').textContent=T[p]||p;
   document.getElementById('page-sub').textContent=S[p]||'';
-  if(p==='summary') renderSum();
+  if(p==='summary'){renderSum();if(results.length&&!cohortSummary)generateCohortSummary();}
   if(p==='rubric') renderRubric();
 }
 
