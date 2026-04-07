@@ -343,13 +343,17 @@ td{padding:9px 12px;color:var(--muted);white-space:nowrap;}
       Home
     </div>
     <div class="nav-label">Workspace</div>
+    <div class="nav-item" id="nav-setup" onclick="showPage('setup')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Data Setup
+    </div>
     <div class="nav-item" id="nav-rubric" onclick="showPage('rubric')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Rubric Framework
     </div>
     <div class="nav-item" id="nav-upload" onclick="showPage('upload')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-      Upload Transcripts
+      Upload & Evaluate
     </div>
     <div class="nav-label">Assessment</div>
     <div class="nav-item" id="nav-overview" onclick="showPage('overview')">
@@ -494,7 +498,105 @@ td{padding:9px 12px;color:var(--muted);white-space:nowrap;}
       </div>
     </div>
 
-    <!-- RUBRIC FRAMEWORK -->
+    <!-- DATA SETUP PAGE -->
+    <div class="page" id="page-setup">
+      <div style="margin-bottom:24px;">
+        <div class="page-title" style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;">Data Setup</div>
+        <div style="font-size:13px;color:var(--muted);">Tell the tool about your course and data format. This helps the AI evaluate more accurately.</div>
+      </div>
+
+      <!-- WORKFLOW GUIDE -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;">How to use RubricAI — Step by Step</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 14px;background:var(--accent-glow);border:1px solid rgba(59,130,246,.2);border-radius:8px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;">1</div>
+            <div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;">Data Setup — You are here</div><div style="font-size:12px;color:var(--muted);">Fill in your course details and column names. This is optional but improves accuracy.</div></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--muted);flex-shrink:0;">2</div>
+            <div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;">Rubric Framework</div><div style="font-size:12px;color:var(--muted);">Upload your rubric file (.md, .txt, .pdf, .docx). Select which indicators to evaluate.</div></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--muted);flex-shrink:0;">3</div>
+            <div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;">Upload & Evaluate</div><div style="font-size:12px;color:var(--muted);">Upload your transcript CSV. Columns are auto-detected. Click Run Evaluation.</div></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--muted);flex-shrink:0;">4</div>
+            <div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;">Class Overview</div><div style="font-size:12px;color:var(--muted);">Review scores for every student. Click any student for full details and individual downloads.</div></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--muted);flex-shrink:0;">5</div>
+            <div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;">Summary & Charts</div><div style="font-size:12px;color:var(--muted);">View cohort-level charts, AI summary, and student rankings. Export full class report.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COURSE INFO -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Course Information</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:16px;">Used in reports and exports to identify this evaluation run.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Course / Program Name</label>
+            <input id="setup-course" type="text" placeholder="e.g. Business Consulting Simulations" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Cohort / Semester</label>
+            <input id="setup-cohort" type="text" placeholder="e.g. Spring 2026" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Session 1 Name</label>
+            <input id="setup-sess1" type="text" placeholder="e.g. User Interview" value="User Interview" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Session 2 Name</label>
+            <input id="setup-sess2" type="text" placeholder="e.g. Client Conversation" value="Client Conversation" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILE FORMAT SETUP -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Your File Format</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:16px;">Tell us what your CSV columns are called. This removes the need for manual mapping.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Student / Participant ID Column</label>
+            <input id="setup-col-id" type="text" placeholder="e.g. participant_id" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Simulation / Course Column</label>
+            <input id="setup-col-sim" type="text" placeholder="e.g. simulation" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Session 1 Transcript Column</label>
+            <input id="setup-col-t1" type="text" placeholder="e.g. transcript_user" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Session 2 Transcript Column</label>
+            <input id="setup-col-t2" type="text" placeholder="e.g. transcript_client" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Completion Status Column</label>
+            <input id="setup-col-done" type="text" placeholder="e.g. completed_user" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI CONTEXT -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Context for AI Evaluation</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:16px;">Any extra context helps the AI score more accurately for your specific course.</div>
+        <textarea id="setup-notes" placeholder="e.g. These are first-year MBA students doing their first simulation. They are being evaluated on interview skills. Client transcripts may be shorter. Focus especially on questioning technique and active listening." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;resize:vertical;min-height:80px;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="btn" onclick="saveSetupForm()" style="padding:10px 24px;">Save Setup</button>
+        <button class="btn btn-ghost" onclick="showPage('rubric')" style="padding:10px 24px;">Next → Rubric Framework</button>
+        <span id="setup-saved" style="display:none;font-size:12px;color:#6ee7b7;font-weight:600;">✓ Setup saved!</span>
+      </div>
+    </div>
     <div class="page" id="page-rubric">
       <div style="margin-bottom:24px;">
         <div class="page-title" style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;">Rubric Framework</div>
@@ -503,10 +605,10 @@ td{padding:9px 12px;color:var(--muted);white-space:nowrap;}
       <div class="rubric-upload-row">
         <div class="upload-card" style="padding:20px;">
           <div class="upload-zone" style="min-height:120px;">
-            <input type="file" accept=".md,.txt" onchange="handleRubric(this)"/>
+            <input type="file" accept=".md,.txt,.pdf,.docx,.doc,.rtf" onchange="handleRubric(this)"/>
             <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <h3>Upload Rubric File</h3>
-            <p>.md or .txt — any course rubric</p>
+            <p>.md · .txt · .pdf · .docx — any format</p>
             <div class="file-tag" id="rubric-name"></div>
           </div>
         </div>
@@ -525,11 +627,36 @@ td{padding:9px 12px;color:var(--muted);white-space:nowrap;}
       <div id="ind-checkboxes"></div>
     </div>
 
-    <!-- UPLOAD TRANSCRIPTS -->
+    <!-- UPLOAD & EVALUATE -->
     <div class="page" id="page-upload">
       <div style="margin-bottom:24px;">
-        <div class="page-title" style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;">Upload Transcripts</div>
-        <div style="font-size:13px;color:var(--muted);">Upload any CSV file. The tool will auto-detect your column format or let you map them manually.</div>
+        <div class="page-title" style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;">Upload & Evaluate</div>
+        <div style="font-size:13px;color:var(--muted);">Upload your transcript CSV. Columns are auto-detected from your file headers.</div>
+      </div>
+
+      <!-- QUICK STATUS -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:${rubricFile?'rgba(16,185,129,.15)':'var(--surface2)'};border:1px solid ${rubricFile?'rgba(16,185,129,.3)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;" id="status-rubric-icon">📄</div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;margin-bottom:2px;">Rubric</div>
+            <div style="font-size:12px;color:var(--muted);" id="status-rubric-text">Not uploaded</div>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;" id="status-file-icon">📊</div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;margin-bottom:2px;">Transcript File</div>
+            <div style="font-size:12px;color:var(--muted);" id="status-file-text">Not uploaded</div>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;" id="status-ind-icon">☑️</div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--subtle);text-transform:uppercase;margin-bottom:2px;">Indicators</div>
+            <div style="font-size:12px;color:var(--muted);" id="status-ind-text">All selected</div>
+          </div>
+        </div>
       </div>
       <div class="upload-card">
         <div class="upload-zone" id="drop-zone">
@@ -1488,11 +1615,12 @@ function showPage(p){
   document.getElementById('page-'+p).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   document.getElementById('nav-'+p)?.classList.add('active');
-  const T={landing:'Home',rubric:'Rubric Framework',upload:'Upload Transcripts',overview:'Class Overview',summary:'Summary & Charts',assistant:'AI Assistant'};
+  const T={landing:'Home',setup:'Data Setup',rubric:'Rubric Framework',upload:'Upload & Evaluate',overview:'Class Overview',summary:'Summary & Charts',assistant:'AI Assistant'};
   const S={
     landing:'CPS LEARN Lab · Northeastern University',
-    rubric:'Upload your rubric and view the full framework',
-    upload:'Upload any CSV — columns auto-detected',
+    setup:'Configure your course, data format, and column names',
+    rubric:'Upload your rubric and select indicators to evaluate',
+    upload:'Upload your transcript CSV and run evaluation',
     overview:results.length?results.length+' students evaluated':'No evaluation run yet',
     summary:results.length?'Performance insights and charts':'No evaluation run yet',
     assistant:'Ask questions about student results or the rubric'
@@ -1501,6 +1629,7 @@ function showPage(p){
   document.getElementById('page-sub').textContent=S[p]||'';
   if(p==='summary'){renderSum();if(results.length&&!cohortSummary)generateCohortSummary();}
   if(p==='rubric') renderRubric();
+  if(p==='upload') updateUploadStatus();
 }
 
 function toast(msg,type=''){
