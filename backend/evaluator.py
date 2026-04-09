@@ -22,14 +22,15 @@ def evaluate_session(transcript, participant_id, session_type, duration=0, rubri
     rubric_section = rubric_text[:4000]
     transcript_section = str(transcript)[:4000]
 
-    # Determine which indicators to evaluate
+    # Default indicator lists (fallback if rubric not parsed)
     if session_type == "user_interview":
         default_indicators = ["C1_I1", "C1_I2", "C1_I3", "C1_I5", "C1_I6", "CT1_I1", "CT1_I3"]
     else:
         default_indicators = ["C2_I1", "C2_I2", "C2_I3", "CT2_I1", "CT2_I2", "CT2_I3", "CT2_I4", "CT3_I1", "CT3_I2", "CT3_I4"]
 
-    if selected_indicators:
-        indicators_to_use = [i for i in default_indicators if i in selected_indicators]
+    # ── FIXED: use selected indicators directly, don't filter against hardcoded list ──
+    if selected_indicators and len(selected_indicators) > 0:
+        indicators_to_use = list(selected_indicators)
         if not indicators_to_use:
             indicators_to_use = default_indicators
     else:
@@ -39,7 +40,7 @@ def evaluate_session(transcript, participant_id, session_type, duration=0, rubri
 
     prompt = f"""You are an expert rubric-based educational assessor evaluating student interview performance.
 
-STUDENT ID: {participant_id}
+PARTICIPANT ID: {participant_id}
 SESSION TYPE: {session_type}
 DURATION: {duration} seconds
 
@@ -55,13 +56,13 @@ Score each on a 1-4 scale based strictly on the rubric criteria.
 For each indicator provide:
 - score: integer 1, 2, 3, or 4
 - rationale: 2-3 sentences explaining why this score was given, referencing the rubric
-- feedback: 1-2 sentences of specific, actionable advice for the student to improve
+- feedback: 1-2 sentences of specific, actionable advice to improve
 - quotes: up to 2 direct quotes from the transcript that support the score
 
 Also provide:
 - comm_score: average of communication indicator scores (float)
 - ct_score: average of critical thinking indicator scores (float)
-- summary: 2-3 sentence overall summary of this student's performance in this session
+- summary: 2-3 sentence overall summary of this participant's performance in this session
 
 Return ONLY valid JSON, no markdown, no extra text:
 {{

@@ -1,38 +1,32 @@
 # RubricAI v2
 ### AI-Powered Student Interview Assessment Tool
 **CPS LEARN Lab · Northeastern University**
+*Active development: March–May 2026 · Built by Tanvi Kadam*
 
 ---
 
 ## What Is This?
 
-RubricAI v2 is an AI-powered tool that automatically evaluates student interview transcripts against any uploaded rubric. Instructors upload a rubric file once, then upload a CSV of transcripts, and the tool scores every student across Communication and Critical Thinking indicators — in minutes, consistently, and at scale.
+RubricAI v2 is an AI-powered tool that automatically evaluates student interview transcripts against any uploaded rubric. Instructors upload a rubric file once, upload a CSV of transcripts, and the tool scores every student across Communication and Critical Thinking indicators — with scores, rationale, and improvement feedback — in minutes.
 
-What normally takes an instructor hours to evaluate manually is completed in under 5 minutes for a full class of 16 students.
-
----
-
-## What's New in v2
-
-- **Any rubric supported** — upload any markdown rubric file and the tool auto-parses clusters, indicators, and level descriptors
-- **Rubric upload separate from transcript upload** — upload rubric once, it saves to disk, used for all evaluations
-- **Rich home page** — problem stats, features, comparison table, AI transparency principles, roadmap
-- **Dashboard charts** — 4-tab summary with KPI cards, horizontal bar charts with full indicator names, donut chart, student rankings
-- **Renamed sessions** — User Interview and Client Conversation throughout
-- **No hardcoded data** — everything driven by real API calls and uploaded files
+What normally takes an instructor hours to evaluate manually is completed in under 5 minutes for a full class.
 
 ---
 
 ## Features
 
-- **Dual upload flow** — upload rubric file first, then transcript CSV
-- **AI scoring** — scores every student across 17 indicators using Claude API
-- **Score colors by level** — Red (Beginning), Orange (Developing), Yellow (Applying), Green (Mastery)
-- **Class Overview** — full table of all students and scores with search and filter
-- **Summary & Charts** — 4 tabs: Overview, User Interview, Client Conversation, Student Rankings
-- **Rubric Framework** — fully expandable accordion with complete level descriptors parsed from uploaded file
-- **AI Assistant** — ask questions about student results or the rubric in natural language
-- **Export** — download results as CSV or PDF report
+- **Any rubric** — upload any .md, .txt, .pdf, or .docx rubric file. Parser auto-detects clusters, indicators, and level descriptors
+- **Any CSV format** — upload any transcript CSV. Columns are auto-detected or manually mapped
+- **Indicator selection** — choose which indicators to evaluate using checkboxes
+- **Data Setup tab** — configure course name, column names, and AI context before evaluating
+- **AI scoring** — scores every student using Claude API with rationale, feedback, and quotes per indicator
+- **Score colors** — Red (Beginning), Orange (Developing), Yellow (Applying), Green (Mastery)
+- **Per-student downloads** — individual CSV and PDF reports with full scores, rationale, and improvement feedback
+- **Download All** — full class CSV export
+- **Cohort AI summary** — auto-generated paragraph summarizing class performance
+- **4-tab dashboard** — Overview, User Interview, Client Conversation, Student Rankings
+- **AI Assistant** — ask questions about results in natural language
+- **Live clock** — US timezone switcher with calendar
 
 ---
 
@@ -44,7 +38,7 @@ What normally takes an instructor hours to evaluate manually is completed in und
 | Backend | Python, FastAPI |
 | AI Model | Claude Sonnet (Anthropic API) |
 | Server | Uvicorn |
-| Data | CSV upload, Markdown rubric |
+| Data | Any CSV, Markdown/PDF/DOCX rubric |
 
 ---
 
@@ -53,32 +47,32 @@ What normally takes an instructor hours to evaluate manually is completed in und
 ```
 rubricai-v2/
 ├── backend/
-│   ├── main.py          # FastAPI server, API endpoints
-│   ├── evaluator.py     # AI scoring logic
+│   ├── main.py          # FastAPI server — evaluation, exports, column detection
+│   ├── evaluator.py     # AI scoring logic — scores, rationale, feedback per indicator
 │   ├── rubric.md        # Saved rubric (replaced on upload)
-│   ├── .env             # API keys (not committed to GitHub)
+│   ├── .env             # API keys (not committed)
 │   └── requirements.txt
 ├── frontend/
-│   └── index.html       # Full frontend — single file
+│   └── index.html       # Complete single-file frontend
 └── data/
     └── merged_sessions_nola.csv   # Sample dataset
 ```
 
 ---
 
-## Setup and Running Locally
+## Setup
 
 ### Prerequisites
 - Python 3.9+
 - Anthropic API key — get one at https://console.anthropic.com
 
-### Step 1 — Clone the repo
+### Step 1 — Clone
 ```bash
 git clone https://github.com/tanvisanjeev/rubricai-v2.git
 cd rubricai-v2
 ```
 
-### Step 2 — Set up the backend
+### Step 2 — Backend setup
 ```bash
 cd backend
 python3 -m venv venv
@@ -86,28 +80,27 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Step 3 — Add your API key
+### Step 3 — Add API key
 ```bash
 nano .env
 ```
-Add:
 ```
 ANTHROPIC_API_KEY=your_key_here
 ```
-Save with Ctrl+O → Enter → Ctrl+X
+Ctrl+O → Enter → Ctrl+X
 
-### Step 4 — Start the backend
+### Step 4 — Start backend
 ```bash
 uvicorn main:app --port 8000
 ```
 
-### Step 5 — Start the frontend (new terminal)
+### Step 5 — Start frontend (new terminal)
 ```bash
 cd ~/rubricai-v2/frontend
 python3 -m http.server 8080
 ```
 
-### Step 6 — Open in browser
+### Step 6 — Open browser
 ```
 http://localhost:8080/index.html
 ```
@@ -116,29 +109,29 @@ http://localhost:8080/index.html
 
 ## How to Run an Evaluation
 
-1. Click **Rubric Framework** in the sidebar
-2. Upload your rubric `.md` or `.txt` file — framework populates automatically
-3. Click **Upload Transcripts** in the sidebar
-4. Upload your transcript CSV
-5. Click **Run Evaluation**
-6. Results appear automatically in Class Overview when done
-7. Click **Summary & Charts** to see the full dashboard
+1. **Data Setup** — fill in course name and column names (optional)
+2. **Rubric Framework** — upload your rubric file, select indicators
+3. **Upload & Evaluate** — upload transcript CSV, click Run Evaluation
+4. **Class Overview** — review scores, click any student for full details, download individual reports
+5. **Summary & Charts** — view cohort dashboard and AI summary
 
 ---
 
 ## CSV Format
 
-Your transcript CSV should have these columns:
+The tool auto-detects columns. Standard column names:
 
 | Column | Description |
 |---|---|
 | participant_id | Unique student ID |
-| simulation | Simulation name |
+| simulation | Simulation or course name |
 | completed_user | Complete or Incomplete |
-| transcript_user | Full user interview transcript text |
-| transcript_client | Full client conversation transcript text |
+| transcript_user | User interview transcript text |
+| transcript_client | Client conversation transcript text |
 | duration_seconds_user | Duration of user session |
 | duration_seconds_client | Duration of client session |
+
+Custom column names can be configured in Data Setup or the column mapping modal.
 
 ---
 
@@ -151,35 +144,39 @@ Your transcript CSV should have these columns:
 | 3 | Applying | 🟡 Yellow |
 | 4 | Mastery | 🟢 Green |
 
-Students scoring below 2.0 average are flagged for instructor review.
+Students averaging below 2.0 are flagged for instructor review.
 
 ---
 
 ## Roadmap
 
-- [x] Dual file upload — rubric and transcript CSV
 - [x] AI scoring with Claude
+- [x] Any rubric file — dynamic parser
+- [x] Any CSV format — column detection and mapping
+- [x] Indicator selection checkboxes
+- [x] Data Setup tab
 - [x] Score colors by level
-- [x] Expandable rubric accordion with full level descriptors from uploaded file
-- [x] KPI cards, horizontal bar charts, donut chart, student rankings
-- [x] Export CSV and PDF
-- [x] Rich home page with features, comparison, AI transparency
+- [x] 4-tab dashboard with full indicator names
+- [x] Per-student CSV and PDF downloads with feedback
+- [x] Cohort AI summary
+- [x] AI Assistant
+- [x] Live clock with US timezone switcher
 - [ ] Human vs AI score comparison tab
-- [ ] Rubric chunking — send only relevant indicator per API call
-- [ ] Persistent results storage across sessions
-- [ ] Multi-rubric support for different courses
+- [ ] Persistent results storage
+- [ ] Save and reload past evaluation runs
+- [ ] Canvas LMS integration
 - [ ] Institution login and multi-cohort management
 
 ---
 
 ## Development Timeline
 
-| Phase | Date | Status |
+| Milestone | Date | Status |
 |---|---|---|
-| v1 — Basic scoring, single indicator | Feb 2026 | Done |
-| v2 — Full rubric, all indicators, dashboard | Mar–Apr 2026 | Done |
-| Summer cohort pilot — 300 students | May–Jun 2026 | Upcoming |
-| Open to other institutions | After pilot | Planned |
+| v1 — basic scoring | Feb 2026 | Done |
+| v2 — full rebuild | Mar–Apr 2026 | Done |
+| Summer cohort pilot | May–Jun 2026 | Upcoming |
+| Open to institutions | After pilot | Planned |
 
 **Active development until May 1, 2026.**
 
@@ -188,9 +185,8 @@ Students scoring below 2.0 average are flagged for instructor review.
 ## Built By
 
 **Tanvi Kadam**
-MS Applied Machine Intelligence · Northeastern University
-CPS LEARN Lab · College of Professional Studies
-Active development: March–May 2026
+AI Engineer · MS Applied Machine Intelligence
+CPS LEARN Lab · Northeastern University
 
 ---
 
