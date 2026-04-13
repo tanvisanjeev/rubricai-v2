@@ -2,12 +2,15 @@ import os
 import csv
 import json
 import io
+import asyncio
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from typing import Optional
-import anthropic
-from evaluator import evaluate_participant, load_rubric
+import google.generativeai as genai
+from dotenv import load_dotenv
+load_dotenv()
+from evaluator import evaluate_participant_async, load_rubric, MAX_CONCURRENT
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -114,6 +117,9 @@ async def evaluate(
     rubric: Optional[UploadFile] = File(None),
     column_mapping: Optional[str] = Form(None),
     selected_indicators: Optional[str] = Form(None),
+    selected_u_indicators: Optional[str] = Form(None),
+    selected_c_indicators: Optional[str] = Form(None),
+    rubric_desc_map: Optional[str] = Form(None),
     setup_data: Optional[str] = Form(None)
 ):
     try:
@@ -128,29 +134,26 @@ async def evaluate(
         else:
             rubric_text = load_rubric()
 
-        # Parse selected indicators
-        sel_inds = None
-        if selected_indicators:
+        # Parse indicators — prefer split U/C, fall back to legacy combined
+        def parse_json_field(s):
             try:
-                sel_inds = json.loads(selected_indicators)
+                return json.loads(s) if s else None
             except Exception:
-                sel_inds = None
+                return None
 
-        # Parse column mapping
-        col_map = None
-        if column_mapping:
-            try:
-                col_map = json.loads(column_mapping)
-            except Exception:
-                col_map = None
+        sel_u = parse_json_field(selected_u_indicators)
+        sel_c = parse_json_field(selected_c_indicators)
+        desc_map = parse_json_field(rubric_desc_map) or {}
 
-        # Parse setup data
-        setup = None
-        if setup_data:
-            try:
-                setup = json.loads(setup_data)
-            except Exception:
-                setup = None
+        # Legacy fallback: if old single-list sent, use for both sessions
+        if not sel_u and not sel_c:
+            legacy = parse_json_field(selected_indicators)
+            if legacy:
+                sel_u = legacy
+                sel_c = legacy
+
+        col_map = parse_json_field(column_mapping)
+        setup = parse_json_field(setup_data)
 
         # Read file (CSV or Excel)
         contents = await file.read()
@@ -171,18 +174,21 @@ async def evaluate(
                 mapped_rows.append(new_row)
             rows = mapped_rows
 
-        # Evaluate each participant
-        students = []
-        for i, row in enumerate(rows):
-            print(f"\nEvaluating participant {i+1}/{len(rows)}")
-            result = evaluate_participant(
-                row,
-                rubric_text=rubric_text,
-                selected_indicators=sel_inds,
-                setup_data=setup
+        print(f"\nEvaluating {len(rows)} participants — {MAX_CONCURRENT} parallel")
+        print(f"  User indicators: {sel_u}")
+        print(f"  Client indicators: {sel_c}")
+
+        # Parallel evaluation using asyncio.gather + semaphore
+        semaphore = asyncio.Semaphore(MAX_CONCURRENT)
+        tasks = [
+            evaluate_participant_async(
+                row, rubric_text, sel_u, sel_c,
+                setup, desc_map, semaphore
             )
-            if result:
-                students.append(result)
+            for row in rows
+        ]
+        results = await asyncio.gather(*tasks)
+        students = [r for r in results if r]
 
         return JSONResponse({
             "status": "success",
@@ -191,23 +197,35 @@ async def evaluate(
         })
 
     except Exception as e:
+        import traceback
         print(f"Evaluation error: {e}")
+        traceback.print_exc()
         return JSONResponse({"status": "error", "message": str(e)})
 
 # ── CHAT ──────────────────────────────────────────────────────
 @app.post("/api/chat")
 async def chat(request: dict):
     try:
-        client = anthropic.Anthropic(api_key=os.getenv("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"))
-        messages = request.get("messages", [])
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         system = request.get("system", "You are a helpful educational assessment assistant.")
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=1000,
-            system=system,
-            messages=messages
+        messages = request.get("messages", [])
+
+        model = genai.GenerativeModel(
+            model_name="gemini-2.5-flash",
+            system_instruction=system,
+            generation_config=genai.types.GenerationConfig(max_output_tokens=1000)
         )
-        return JSONResponse({"status": "success", "reply": response.content[0].text})
+
+        # Convert anthropic-style messages to Gemini history format
+        history = []
+        for msg in messages[:-1]:
+            role = "model" if msg["role"] == "assistant" else "user"
+            history.append({"role": role, "parts": [msg["content"]]})
+
+        chat_session = model.start_chat(history=history)
+        last_msg = messages[-1]["content"] if messages else ""
+        response = chat_session.send_message(last_msg)
+        return JSONResponse({"status": "success", "reply": response.text})
     except Exception as e:
         return JSONResponse({"status": "error", "message": str(e)})
 

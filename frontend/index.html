@@ -1109,7 +1109,9 @@ async function runEval(){
   fd.append('file',file);
   if(rubricFile) fd.append('rubric',rubricFile);
   if(Object.keys(columnMapping).length>0) fd.append('column_mapping',JSON.stringify(columnMapping));
-  fd.append('selected_indicators',JSON.stringify([...selectedInds]));
+  fd.append('selected_u_indicators',JSON.stringify(U_IND.filter(i=>selectedInds.has(i))));
+  fd.append('selected_c_indicators',JSON.stringify(C_IND.filter(i=>selectedInds.has(i))));
+  fd.append('rubric_desc_map',JSON.stringify(rubricDescMap));
   fd.append('setup_data',JSON.stringify(setupData));
   try{
     pb.style.width='20%';ps.textContent='Evaluating with AI — this may take several minutes.';

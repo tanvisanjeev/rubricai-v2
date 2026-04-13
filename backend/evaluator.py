@@ -1,11 +1,50 @@
 import os
 import json
 import time
-import anthropic
+import re
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+import google.generativeai as genai
+from dotenv import load_dotenv
 
-# ── CLIENT ────────────────────────────────────────────────────
-def get_client():
-    return anthropic.Anthropic(api_key="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")
+load_dotenv()
+
+GEMINI_MODEL = "gemini-2.5-flash"
+MAX_CONCURRENT = 8  # parallel participants at once
+
+executor = ThreadPoolExecutor(max_workers=MAX_CONCURRENT * 2)
+
+
+# ── GEMINI CLIENT ─────────────────────────────────────────────
+def get_gemini_model(json_mode=True):
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+    config = genai.types.GenerationConfig(
+        temperature=0.0,
+        max_output_tokens=8192,
+        response_mime_type="application/json" if json_mode else "text/plain",
+    )
+    return genai.GenerativeModel(model_name=GEMINI_MODEL, generation_config=config)
+
+
+# ── RATE-LIMIT-AWARE CALL ─────────────────────────────────────
+def call_gemini(model, prompt, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            response = model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            err = str(e).lower()
+            if "429" in err or "quota" in err or "rate" in err or "resource_exhausted" in err:
+                wait = 30 * (attempt + 1)
+                print(f"    Rate limited — waiting {wait}s (retry {attempt+1}/{max_retries})")
+                time.sleep(wait)
+            elif attempt < max_retries - 1:
+                print(f"    API error (attempt {attempt+1}): {e} — retrying in 5s")
+                time.sleep(5)
+            else:
+                raise
+    return None
+
 
 # ── LOAD RUBRIC ───────────────────────────────────────────────
 def load_rubric(rubric_text=None):
@@ -17,47 +56,122 @@ def load_rubric(rubric_text=None):
             return f.read()
     return ""
 
-# ── BUILD CONTEXT FROM DATA SETUP ────────────────────────────
+
+# ── RUBRIC SECTION EXTRACTOR ──────────────────────────────────
+def extract_indicator_sections(rubric_text, indicator_ids):
+    """
+    Extract only the rubric sections for the given indicator IDs.
+    Uses the same parsing logic as the frontend (sequential cluster/indicator counting).
+    Reduces token usage from ~15K to ~2-4K per call.
+    """
+    if not indicator_ids or not rubric_text:
+        return rubric_text
+
+    lines = rubric_text.split('\n')
+    cluster_idx = 0
+    ind_idx = 0
+    current_id = None
+    current_lines = []
+    sections = {}
+
+    for line in lines:
+        # Cluster header (####, but NOT #####)
+        if re.match(r'^####\s+', line) and not re.match(r'^#####', line):
+            if current_id and current_lines:
+                sections[current_id] = '\n'.join(current_lines)
+            current_id = None
+            current_lines = []
+            cluster_idx += 1
+            ind_idx = 0
+            continue
+
+        # Indicator header (#####)
+        if re.match(r'^#####\s+', line):
+            if current_id and current_lines:
+                sections[current_id] = '\n'.join(current_lines)
+            current_id = None
+            current_lines = []
+            header = re.sub(r'^#####\s+', '', line).replace('**', '').strip()
+            if re.search(r'indicator', header, re.I):
+                ind_idx += 1
+                current_id = f"C{cluster_idx}_I{ind_idx}"
+                current_lines = [line]
+            continue
+
+        if current_id:
+            current_lines.append(line)
+
+    if current_id and current_lines:
+        sections[current_id] = '\n'.join(current_lines)
+
+    # Build output with only the requested indicators
+    parts = []
+    for ind_id in indicator_ids:
+        if ind_id in sections:
+            parts.append(f"[{ind_id}]\n{sections[ind_id]}")
+
+    if not parts:
+        print(f"  Warning: Could not extract rubric sections for {indicator_ids} — using full rubric")
+        return rubric_text
+
+    return '\n\n'.join(parts)
+
+
+# ── CONTEXT BUILDER ───────────────────────────────────────────
 def build_context(setup_data=None):
     if not setup_data:
         return ""
-    parts = []
-    if setup_data.get("course"):
-        parts.append(f"Course/Program: {setup_data['course']}")
-    if setup_data.get("academic_level"):
-        parts.append(f"Academic Level: {setup_data['academic_level']}")
-    if setup_data.get("institution"):
-        parts.append(f"Institution: {setup_data['institution']}")
-    if setup_data.get("cohort"):
-        parts.append(f"Cohort/Semester: {setup_data['cohort']}")
-    if setup_data.get("simulation_type"):
-        parts.append(f"Simulation Type: {setup_data['simulation_type']}")
-    if setup_data.get("participant_role"):
-        parts.append(f"Participant Role: {setup_data['participant_role']}")
-    if setup_data.get("session_number"):
-        parts.append(f"Session: {setup_data['session_number']}")
-    if setup_data.get("eval_purpose"):
-        parts.append(f"Evaluation Purpose: {setup_data['eval_purpose']}")
-    if setup_data.get("expected_level"):
-        parts.append(f"Expected Performance Level: {setup_data['expected_level']}")
-    if setup_data.get("language_expectation"):
-        parts.append(f"Language/Tone Expectation: {setup_data['language_expectation']}")
-    if setup_data.get("researcher_looking_for"):
-        parts.append(f"Researcher is looking for: {setup_data['researcher_looking_for']}")
-    if setup_data.get("strong_performance"):
-        parts.append(f"Strong performance looks like: {setup_data['strong_performance']}")
-    if setup_data.get("red_flags"):
-        parts.append(f"Red flags to watch for: {setup_data['red_flags']}")
-    if setup_data.get("cohort_notes"):
-        parts.append(f"Additional cohort context: {setup_data['cohort_notes']}")
+    fields = [
+        ("course", "Course/Program"),
+        ("academic_level", "Academic Level"),
+        ("institution", "Institution"),
+        ("cohort", "Cohort/Semester"),
+        ("simulation_type", "Simulation Type"),
+        ("participant_role", "Participant Role"),
+        ("session_number", "Session"),
+        ("eval_purpose", "Evaluation Purpose"),
+        ("expected_level", "Expected Performance Level"),
+        ("language_expectation", "Language/Tone Expectation"),
+        ("researcher_looking_for", "Researcher is looking for"),
+        ("strong_performance", "Strong performance looks like"),
+        ("red_flags", "Red flags to watch for"),
+        ("cohort_notes", "Additional cohort context"),
+    ]
+    parts = [f"{label}: {setup_data[key]}" for key, label in fields if setup_data.get(key)]
     return "\n".join(parts)
 
-# ── DETERMINE FLAGS FROM SCORES ───────────────────────────────
+
+# ── SERVER-SIDE SCORE CALCULATION ─────────────────────────────
+def calculate_scores(scores_dict, indicator_ids):
+    """
+    Calculate comm and CT aggregate scores from returned scores.
+    CT indicators = clusters 3+ (heuristic: comm clusters are 1-2, CT clusters are 3+).
+    This avoids asking the model to compute averages, which is unreliable.
+    """
+    if not scores_dict or not indicator_ids:
+        return 0.0, 0.0
+
+    def cluster_num(ind_id):
+        m = re.match(r'C(\d+)_', ind_id)
+        return int(m.group(1)) if m else 0
+
+    all_scores = [
+        scores_dict[i]["score"] for i in indicator_ids
+        if i in scores_dict and isinstance(scores_dict[i].get("score"), (int, float))
+    ]
+    ct_scores = [
+        scores_dict[i]["score"] for i in indicator_ids
+        if i in scores_dict and isinstance(scores_dict[i].get("score"), (int, float))
+        and cluster_num(i) >= 3
+    ]
+
+    comm = round(sum(all_scores) / len(all_scores), 2) if all_scores else 0.0
+    ct = round(sum(ct_scores) / len(ct_scores), 2) if ct_scores else 0.0
+    return comm, ct
+
+
+# ── FLAG LOGIC ────────────────────────────────────────────────
 def determine_flags(scores_dict):
-    """
-    AI-driven flagging based on rubric evidence — no arbitrary threshold.
-    Flag if: 2+ indicators at Level 1, OR overall avg below 2.0, OR no scores at all.
-    """
     if not scores_dict:
         return True, "No scores recorded — session may be incomplete or transcript too short."
     score_values = [v.get("score", 0) for v in scores_dict.values() if v.get("score")]
@@ -67,110 +181,83 @@ def determine_flags(scores_dict):
     avg = sum(score_values) / len(score_values)
     reasons = []
     if level1_count >= 2:
-        reasons.append(f"{level1_count} indicators scored at Beginning (Level 1)")
+        reasons.append(f"{level1_count} indicators at Beginning (Level 1)")
     if avg < 2.0:
-        reasons.append(f"Overall average {avg:.2f} below developing threshold")
-    if reasons:
-        return True, "; ".join(reasons)
-    return False, ""
+        reasons.append(f"Average {avg:.2f} below developing threshold")
+    return (True, "; ".join(reasons)) if reasons else (False, "")
+
 
 # ── EVALUATE SESSION ──────────────────────────────────────────
 def evaluate_session(
     transcript, participant_id, session_type,
     duration=0, rubric_text=None,
-    selected_indicators=None, setup_data=None
+    selected_indicators=None, setup_data=None, rubric_desc_map=None
 ):
     if not rubric_text:
         rubric_text = load_rubric()
 
-    rubric_section = rubric_text
-    transcript_section = str(transcript)
-
-    # Default fallback indicators
-    if session_type == "user_interview":
-        default_indicators = ["C1_I1", "C1_I2", "C1_I3", "C1_I5", "C1_I6", "CT1_I1", "CT1_I3"]
-    else:
-        default_indicators = ["C2_I1", "C2_I2", "C2_I3", "CT2_I1", "CT2_I2", "CT2_I3", "CT2_I4", "CT3_I1", "CT3_I2", "CT3_I4"]
-
-    # ── USE SELECTED INDICATORS DIRECTLY ──
-    if selected_indicators and len(selected_indicators) > 0:
-        indicators_to_use = list(selected_indicators)
-    else:
-        indicators_to_use = default_indicators
-
-    if not indicators_to_use:
-        print(f"  No indicators to evaluate for {participant_id} [{session_type}]")
+    if not selected_indicators:
+        print(f"  No indicators for [{session_type}] — skipping")
         return None
 
-    ind_list = ", ".join(indicators_to_use)
+    rubric_section = extract_indicator_sections(rubric_text, selected_indicators)
+    transcript_section = str(transcript)
     context_block = build_context(setup_data)
+    session_label = "User Interview" if session_type == "user_interview" else "Client Conversation"
 
-    print(f"  Evaluating {participant_id} [{session_type}] — {len(indicators_to_use)} indicators")
+    # Build indicator list with names for clarity
+    ind_lines = []
+    for ind in selected_indicators:
+        name = (rubric_desc_map or {}).get(ind, ind)
+        ind_lines.append(f"  {ind}: {name}")
+    ind_list_text = "\n".join(ind_lines)
 
-    prompt = f"""You are an expert rubric-based educational assessor working for a university research lab.
-Your evaluations must be evidence-based, consistent, and academically rigorous.
+    print(f"  [{session_label}] {participant_id} — {len(selected_indicators)} indicators")
 
-PARTICIPANT ID: {participant_id}
-SESSION TYPE: {session_type}
+    prompt = f"""You are an expert educational assessor for a university research lab.
+Evaluate this student's {session_label} transcript against the rubric below.
+
+PARTICIPANT: {participant_id}
+SESSION: {session_label}
 DURATION: {duration} seconds
+{f"CONTEXT:{chr(10)}{context_block}{chr(10)}" if context_block else ""}
+INDICATORS TO SCORE:
+{ind_list_text}
 
-{"EVALUATION CONTEXT:" if context_block else ""}
-{context_block}
-
-RUBRIC (score strictly against these level descriptors):
+RUBRIC LEVEL DESCRIPTORS (score STRICTLY against these — not general impression):
 {rubric_section}
 
-TRANSCRIPT TO EVALUATE:
+STUDENT TRANSCRIPT:
 {transcript_section}
 
-YOUR TASK:
-Evaluate ONLY these indicators: {ind_list}
+SCORING RULES:
+- Score: 1=Beginning, 2=Developing, 3=Applying, 4=Mastery
+- rationale: 2-3 sentences citing specific rubric criteria AND specific transcript evidence
+- feedback: 1-2 actionable sentences for reaching the next level
+- quotes: up to 2 verbatim quotes from transcript ([] if none found)
+- If transcript lacks sufficient evidence for an indicator, score 1 and explain why in rationale
+- summary: 2-3 sentence narrative of overall performance patterns
 
-For EACH indicator ID above, provide:
-- score: integer 1, 2, 3, or 4 (must match rubric level descriptors exactly)
-- rationale: 2-3 sentences explaining exactly why this score — reference specific rubric criteria and specific evidence from transcript
-- feedback: 1-2 sentences of specific, actionable improvement advice tied to reaching the next level
-- quotes: list of up to 2 direct quotes from transcript supporting the score (empty list [] if none found)
-
-Also provide:
-- comm_score: average of ALL indicator scores (float, 1 decimal)
-- ct_score: 0.0 if no critical thinking indicators present, else average of CT indicator scores
-- summary: 2-3 sentence analytical summary of overall performance — be specific, reference patterns
-
-CRITICAL RULES:
-- Use EXACT indicator IDs from this list as JSON keys: {ind_list}
-- Score ONLY based on rubric criteria — not general impression
-- temperature=0 means be deterministic and consistent
-- If transcript is too short to evaluate an indicator, score it 1 and note it in rationale
-- Never invent quotes — only use text actually present in transcript
-
-Return ONLY valid JSON, no markdown, no code blocks, no extra text:
+Return ONLY valid JSON:
 {{
   "scores": {{
     "INDICATOR_ID": {{
       "score": 2,
-      "rationale": "specific explanation referencing rubric criteria and transcript evidence",
-      "feedback": "specific actionable advice for reaching next level",
-      "quotes": ["exact quote from transcript"]
+      "rationale": "explanation with rubric criteria and transcript evidence",
+      "feedback": "actionable next step",
+      "quotes": ["verbatim quote"]
     }}
   }},
-  "comm_score": 2.3,
-  "ct_score": 1.8,
-  "summary": "analytical performance summary"
+  "summary": "overall performance narrative"
 }}"""
 
     try:
-        client = get_client()
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=4096,
-            temperature=0,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        text = response.content[0].text.strip()
-        print(f"    Raw response length: {len(text)} chars")
+        model = get_gemini_model(json_mode=True)
+        text = call_gemini(model, prompt)
+        if not text:
+            return None
 
-        # Strip markdown code blocks if present
+        # Fallback markdown strip
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0].strip()
         elif "```" in text:
@@ -178,16 +265,16 @@ Return ONLY valid JSON, no markdown, no code blocks, no extra text:
 
         parsed = json.loads(text)
         score_count = len(parsed.get("scores", {}))
-        print(f"    ✓ {score_count} indicators scored successfully")
+        print(f"    ✓ {score_count}/{len(selected_indicators)} scored — {participant_id} [{session_label}]")
         return parsed
 
     except json.JSONDecodeError as e:
-        print(f"    ✗ JSON parse error for {participant_id} [{session_type}]: {e}")
-        print(f"    Response preview: {text[:300] if 'text' in dir() else 'no response'}")
+        print(f"    ✗ JSON error — {participant_id} [{session_label}]: {e}")
         return None
     except Exception as e:
-        print(f"    ✗ Error evaluating {participant_id} [{session_type}]: {e}")
+        print(f"    ✗ Error — {participant_id} [{session_label}]: {e}")
         return None
+
 
 # ── FLEXIBLE COLUMN EXTRACTION ────────────────────────────────
 def get_col(row, *keys, default=""):
@@ -200,8 +287,13 @@ def get_col(row, *keys, default=""):
             return row_lower[str(k).lower()]
     return default
 
-# ── EVALUATE PARTICIPANT ──────────────────────────────────────
-def evaluate_participant(row, rubric_text=None, selected_indicators=None, setup_data=None):
+
+# ── EVALUATE PARTICIPANT (sync, runs in thread pool) ──────────
+def evaluate_participant(
+    row, rubric_text=None,
+    selected_u_indicators=None, selected_c_indicators=None,
+    setup_data=None, rubric_desc_map=None
+):
     pid = get_col(row, "participant_id", "student_id", "id", "student", "name", "participant")
     simulation = get_col(row, "simulation", "sim", "course", "assignment", "session_name", "scenario")
     transcript_user = get_col(
@@ -216,9 +308,10 @@ def evaluate_participant(row, rubric_text=None, selected_indicators=None, setup_
     duration_client = get_col(row, "duration_seconds_client", "duration_client", "client_duration", default=0)
     completed_user = get_col(row, "completed_user", "completed", "status", default="Complete")
 
-    print(f"\nParticipant: {pid} | Simulation: {simulation}")
-    print(f"  User transcript: {len(str(transcript_user))} chars | Client transcript: {len(str(transcript_client))} chars")
-    print(f"  Selected indicators: {selected_indicators}")
+    print(f"\n{'='*50}")
+    print(f"Participant: {pid} | Sim: {simulation}")
+    print(f"  User transcript: {len(str(transcript_user))} chars")
+    print(f"  Client transcript: {len(str(transcript_client))} chars")
 
     result = {
         "participant_id": str(pid) if pid else "unknown",
@@ -230,45 +323,66 @@ def evaluate_participant(row, rubric_text=None, selected_indicators=None, setup_
     }
 
     # ── USER INTERVIEW ──
-    if transcript_user and len(str(transcript_user).strip()) > 50:
-        time.sleep(5)
+    has_user = transcript_user and len(str(transcript_user).strip()) > 50
+    has_u_inds = selected_u_indicators and len(selected_u_indicators) > 0
+
+    if has_user and has_u_inds:
         user_result = evaluate_session(
             transcript_user, pid, "user_interview",
             duration=duration_user,
             rubric_text=rubric_text,
-            selected_indicators=selected_indicators,
-            setup_data=setup_data
+            selected_indicators=selected_u_indicators,
+            setup_data=setup_data,
+            rubric_desc_map=rubric_desc_map
         )
         if user_result:
-            result["comm_user"] = round(float(user_result.get("comm_score") or 0), 2)
-            result["ct_user"] = round(float(user_result.get("ct_score") or 0), 2)
+            comm, ct = calculate_scores(user_result.get("scores", {}), selected_u_indicators)
+            result["comm_user"] = comm
+            result["ct_user"] = ct
             result["_detail"]["user"] = user_result
             for ind, data in user_result.get("scores", {}).items():
                 result[f"{ind}_user_score"] = data.get("score", 0)
-        else:
-            print(f"  ✗ No result for {pid} user_interview")
-    else:
-        print(f"  Skipping user transcript — too short or empty")
+    elif not has_user:
+        print(f"  Skipping user interview — transcript too short or missing")
+    elif not has_u_inds:
+        print(f"  Skipping user interview — no indicators selected")
 
     # ── CLIENT CONVERSATION ──
-    if transcript_client and len(str(transcript_client).strip()) > 50:
-        time.sleep(5)
+    has_client = transcript_client and len(str(transcript_client).strip()) > 50
+    has_c_inds = selected_c_indicators and len(selected_c_indicators) > 0
+
+    if has_client and has_c_inds:
         client_result = evaluate_session(
             transcript_client, pid, "client_conversation",
             duration=duration_client,
             rubric_text=rubric_text,
-            selected_indicators=selected_indicators,
-            setup_data=setup_data
+            selected_indicators=selected_c_indicators,
+            setup_data=setup_data,
+            rubric_desc_map=rubric_desc_map
         )
         if client_result:
-            result["comm_client"] = round(float(client_result.get("comm_score") or 0), 2)
-            result["ct_client"] = round(float(client_result.get("ct_score") or 0), 2)
+            comm, ct = calculate_scores(client_result.get("scores", {}), selected_c_indicators)
+            result["comm_client"] = comm
+            result["ct_client"] = ct
             result["_detail"]["client"] = client_result
             for ind, data in client_result.get("scores", {}).items():
                 result[f"{ind}_client_score"] = data.get("score", 0)
-        else:
-            print(f"  ✗ No result for {pid} client_conversation")
-    else:
-        print(f"  Skipping client transcript — too short or empty")
+    elif not has_client:
+        print(f"  Skipping client conversation — transcript too short or missing")
+    elif not has_c_inds:
+        print(f"  Skipping client conversation — no indicators selected")
 
     return result
+
+
+# ── ASYNC WRAPPER FOR PARALLEL EXECUTION ──────────────────────
+async def evaluate_participant_async(
+    row, rubric_text, sel_u, sel_c,
+    setup_data, rubric_desc_map, semaphore
+):
+    async with semaphore:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            executor,
+            lambda: evaluate_participant(row, rubric_text, sel_u, sel_c, setup_data, rubric_desc_map)
+        )
