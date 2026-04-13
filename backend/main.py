@@ -17,6 +17,35 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 
 app = FastAPI()
 
+def parse_upload_to_rows(contents: bytes, filename: str) -> list:
+    """Return a list of row dicts from a CSV, XLSX, or XLS upload."""
+    fname = (filename or "").lower()
+    if fname.endswith(".xlsx"):
+        import openpyxl
+        wb = openpyxl.load_workbook(io.BytesIO(contents), read_only=True, data_only=True)
+        ws = wb.active
+        rows_iter = iter(ws.rows)
+        headers = [cell.value for cell in next(rows_iter)]
+        rows = [
+            {headers[i]: ("" if cell.value is None else str(cell.value))
+             for i, cell in enumerate(row)}
+            for row in rows_iter
+        ]
+        wb.close()
+        return rows
+    elif fname.endswith(".xls"):
+        import xlrd
+        wb = xlrd.open_workbook(file_contents=contents)
+        ws = wb.sheet_by_index(0)
+        headers = [str(ws.cell_value(0, c)) for c in range(ws.ncols)]
+        return [
+            {headers[c]: str(ws.cell_value(r, c)) for c in range(ws.ncols)}
+            for r in range(1, ws.nrows)
+        ]
+    else:
+        text = contents.decode("utf-8-sig")
+        return list(csv.DictReader(io.StringIO(text)))
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -34,11 +63,9 @@ async def root():
 async def detect_columns(file: UploadFile = File(...)):
     try:
         contents = await file.read()
-        text = contents.decode("utf-8-sig")
-        reader = csv.DictReader(io.StringIO(text))
-        rows = list(reader)
+        rows = parse_upload_to_rows(contents, file.filename)
         if not rows:
-            return JSONResponse({"status": "error", "message": "CSV file is empty"})
+            return JSONResponse({"status": "error", "message": "File is empty"})
         columns = [c.strip() for c in rows[0].keys()]
         sample_row = {k.strip(): str(v)[:150] for k, v in rows[0].items()}
         mapping = {}
@@ -125,14 +152,12 @@ async def evaluate(
             except Exception:
                 setup = None
 
-        # Read CSV
+        # Read file (CSV or Excel)
         contents = await file.read()
-        text = contents.decode("utf-8-sig")
-        reader = csv.DictReader(io.StringIO(text))
-        rows = list(reader)
+        rows = parse_upload_to_rows(contents, file.filename)
 
         if not rows:
-            return JSONResponse({"status": "error", "message": "No data found in CSV"})
+            return JSONResponse({"status": "error", "message": "No data found in file"})
 
         # Apply column mapping
         if col_map:

@@ -1097,11 +1097,13 @@ function confirmColMapping(){
 
 // ── RUN EVALUATION ────────────────────────────────────────────
 async function runEval(){
-  if(!file)return;
-  if(selectedInds.size===0){toast('Select at least one indicator in Rubric Framework.','err');return;}
+  const btn=document.getElementById('run-btn');
+  btn.disabled=true;
+  if(!file){btn.disabled=false;return;}
+  if(selectedInds.size===0){toast('Select at least one indicator in Rubric Framework.','err');btn.disabled=false;return;}
   const pw=document.getElementById('prog-wrap'),pb=document.getElementById('prog-bar'),
-    ps=document.getElementById('prog-status'),btn=document.getElementById('run-btn');
-  pw.style.display='block';btn.disabled=true;pb.style.width='10%';
+    ps=document.getElementById('prog-status');
+  pw.style.display='block';pb.style.width='10%';
   ps.textContent='Uploading files...';
   const fd=new FormData();
   fd.append('file',file);
@@ -1124,7 +1126,7 @@ async function runEval(){
     const badge=document.getElementById('nav-count');
     if(badge){badge.textContent=results.length;badge.style.display='inline';}
     cohortSummary='';
-    setTimeout(()=>{showPage('overview');renderOv();},700);
+    showPage('overview');
   }catch(e){
     pb.style.width='0%';ps.textContent='Error: '+e.message;
     btn.disabled=false;toast('Evaluation failed: '+e.message,'err');
@@ -1647,6 +1649,7 @@ function showPage(p){
   };
   document.getElementById('page-title').textContent=T[p]||p;
   document.getElementById('page-sub').textContent=S[p]||'';
+  if(p==='overview') renderOv();
   if(p==='summary'){renderSum();if(results.length&&!cohortSummary)generateCohortSummary();}
   if(p==='rubric') renderRubric();
   if(p==='upload') updateStatusCards();
