@@ -4,38 +4,38 @@ import time
 import re
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-import google.generativeai as genai
+import anthropic
 from dotenv import load_dotenv
 
 load_dotenv()
 
-GEMINI_MODEL = "gemini-2.5-flash"
-MAX_CONCURRENT = 8  # parallel participants at once
+CLAUDE_MODEL = "claude-haiku-4-5-20251001"  # fast + cheap for bulk evaluation
+MAX_CONCURRENT = 3  # parallel participants at once
 
 executor = ThreadPoolExecutor(max_workers=MAX_CONCURRENT * 2)
 
 
-# ── GEMINI CLIENT ─────────────────────────────────────────────
-def get_gemini_model(json_mode=True):
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-    config = genai.types.GenerationConfig(
-        temperature=0.0,
-        max_output_tokens=8192,
-        response_mime_type="application/json" if json_mode else "text/plain",
-    )
-    return genai.GenerativeModel(model_name=GEMINI_MODEL, generation_config=config)
+# ── CLAUDE CLIENT ─────────────────────────────────────────────
+def get_claude_client():
+    return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 
 # ── RATE-LIMIT-AWARE CALL ─────────────────────────────────────
-def call_gemini(model, prompt, max_retries=3):
+def call_claude(prompt, max_retries=3):
+    client = get_claude_client()
     for attempt in range(max_retries):
         try:
-            response = model.generate_content(prompt)
-            return response.text
+            response = client.messages.create(
+                model=CLAUDE_MODEL,
+                max_tokens=4096,
+                temperature=0.0,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.content[0].text
         except Exception as e:
             err = str(e).lower()
-            if "429" in err or "quota" in err or "rate" in err or "resource_exhausted" in err:
-                wait = 30 * (attempt + 1)
+            if "429" in err or "rate" in err or "overloaded" in err:
+                wait = 20 * (attempt + 1)
                 print(f"    Rate limited — waiting {wait}s (retry {attempt+1}/{max_retries})")
                 time.sleep(wait)
             elif attempt < max_retries - 1:
@@ -130,7 +130,6 @@ def build_context(setup_data=None):
         ("participant_role", "Participant Role"),
         ("session_number", "Session"),
         ("eval_purpose", "Evaluation Purpose"),
-        ("expected_level", "Expected Performance Level"),
         ("language_expectation", "Language/Tone Expectation"),
         ("researcher_looking_for", "Researcher is looking for"),
         ("strong_performance", "Strong performance looks like"),
@@ -252,8 +251,7 @@ Return ONLY valid JSON:
 }}"""
 
     try:
-        model = get_gemini_model(json_mode=True)
-        text = call_gemini(model, prompt)
+        text = call_claude(prompt)
         if not text:
             return None
 

@@ -7,7 +7,6 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from typing import Optional
-import google.generativeai as genai
 from dotenv import load_dotenv
 load_dotenv()
 from evaluator import evaluate_participant_async, load_rubric, MAX_CONCURRENT
@@ -206,26 +205,17 @@ async def evaluate(
 @app.post("/api/chat")
 async def chat(request: dict):
     try:
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        import anthropic
         system = request.get("system", "You are a helpful educational assessment assistant.")
         messages = request.get("messages", [])
-
-        model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
-            system_instruction=system,
-            generation_config=genai.types.GenerationConfig(max_output_tokens=1000)
+        client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1000,
+            system=system,
+            messages=[{"role": m["role"], "content": m["content"]} for m in messages]
         )
-
-        # Convert anthropic-style messages to Gemini history format
-        history = []
-        for msg in messages[:-1]:
-            role = "model" if msg["role"] == "assistant" else "user"
-            history.append({"role": role, "parts": [msg["content"]]})
-
-        chat_session = model.start_chat(history=history)
-        last_msg = messages[-1]["content"] if messages else ""
-        response = chat_session.send_message(last_msg)
-        return JSONResponse({"status": "success", "reply": response.text})
+        return JSONResponse({"status": "success", "reply": response.content[0].text})
     except Exception as e:
         return JSONResponse({"status": "error", "message": str(e)})
 
@@ -468,4 +458,143 @@ async def export_pdf(request: dict):
         buffer,
         media_type="application/pdf",
         headers={"Content-Disposition": "attachment; filename=rubricai_report.pdf"}
+    )
+
+# ── EXPORT COHORT PDF ─────────────────────────────────────────
+@app.post("/api/export/cohort-pdf")
+async def export_cohort_pdf(request: dict):
+    from datetime import datetime
+    setup = request.get("setup_data", {})
+    kpis = request.get("kpis", {})
+    distribution = request.get("distribution", [])
+    indicator_averages = request.get("indicator_averages", [])
+    cohort_summary = request.get("cohort_summary", "")
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=letter,
+        rightMargin=0.75*inch, leftMargin=0.75*inch,
+        topMargin=0.75*inch, bottomMargin=0.75*inch
+    )
+    styles = getSampleStyleSheet()
+    story = []
+
+    title_style = ParagraphStyle('Title', parent=styles['Title'],
+        fontSize=22, textColor=colors.HexColor('#0f172a'), spaceAfter=6, alignment=TA_LEFT)
+    sub_style = ParagraphStyle('Sub', parent=styles['Normal'],
+        fontSize=10, textColor=colors.HexColor('#64748b'), spaceAfter=4)
+    head_style = ParagraphStyle('Head', parent=styles['Heading2'],
+        fontSize=13, textColor=colors.HexColor('#1e3a5f'), spaceBefore=16, spaceAfter=6)
+    body_style = ParagraphStyle('Body', parent=styles['Normal'],
+        fontSize=9.5, textColor=colors.HexColor('#334155'), leading=14, spaceAfter=4)
+
+    # ── Title Block ──
+    story.append(Paragraph("RubricAI v2", title_style))
+    story.append(Paragraph("Cohort Summary Report", ParagraphStyle('Sub2',
+        parent=styles['Normal'], fontSize=14, textColor=colors.HexColor('#3b82f6'), spaceAfter=4)))
+    story.append(Paragraph(f"Generated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}", sub_style))
+    if setup.get("course"):
+        story.append(Paragraph(f"Course: {setup['course']}", sub_style))
+    if setup.get("cohort"):
+        story.append(Paragraph(f"Cohort: {setup['cohort']}", sub_style))
+    story.append(Paragraph("CPS LEARN Lab · Northeastern University", sub_style))
+    story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#3b82f6'), spaceAfter=16))
+
+    # ── KPI Table ──
+    story.append(Paragraph("Cohort KPIs", head_style))
+    kpi_headers = ["Total Participants", "Completed", "Avg Comm (User)", "Avg CT (User)"]
+    kpi_vals = [
+        str(kpis.get("total", "N/A")),
+        str(kpis.get("completed", "N/A")),
+        str(kpis.get("avg_comm_user") or "N/A"),
+        str(kpis.get("avg_ct_user") or "N/A"),
+    ]
+    if kpis.get("avg_comm_client") is not None:
+        kpi_headers += ["Avg Comm (Client)", "Avg CT (Client)"]
+        kpi_vals += [str(kpis.get("avg_comm_client") or "N/A"), str(kpis.get("avg_ct_client") or "N/A")]
+    n = len(kpi_headers)
+    col_w = 7.0 / n * inch
+    kpi_table = Table([kpi_headers, kpi_vals], colWidths=[col_w]*n)
+    kpi_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#f1f5f9')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.HexColor('#64748b')),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('FONTNAME', (0,1), (-1,1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,1), (-1,1), 13),
+        ('TEXTCOLOR', (0,1), (-1,1), colors.HexColor('#0f172a')),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+        ('TOPPADDING', (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+    ]))
+    story.append(kpi_table)
+    story.append(Spacer(1, 16))
+
+    # ── Score Distribution ──
+    if distribution:
+        story.append(Paragraph("Score Distribution", head_style))
+        dist_data = [["Level", "Label", "Count", "Percentage"]]
+        for d in distribution:
+            dist_data.append([str(d.get("level","")), d.get("label",""), str(d.get("count",0)), f"{d.get('pct',0)}%"])
+        dist_table = Table(dist_data, colWidths=[0.6*inch, 1.2*inch, 0.8*inch, 1.2*inch])
+        dist_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#f1f5f9')),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,-1), 9),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+            ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f8fafc')]),
+            ('TOPPADDING', (0,0), (-1,-1), 6), ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ]))
+        story.append(dist_table)
+        story.append(Spacer(1, 16))
+
+    # ── Indicator Averages ──
+    if indicator_averages:
+        story.append(Paragraph("Indicator Averages", head_style))
+        ind_data = [["Indicator ID", "Session", "Avg Score", "Indicator Name"]]
+        for row in indicator_averages:
+            avg_val = f"{row['avg']:.2f}" if row.get("avg") is not None else "N/A"
+            ind_data.append([row.get("id",""), row.get("session",""), avg_val, row.get("name","")])
+        ind_table = Table(ind_data, colWidths=[0.9*inch, 1.6*inch, 0.9*inch, 3.6*inch])
+        ind_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#f1f5f9')),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,-1), 8.5),
+            ('ALIGN', (0,0), (2,-1), 'CENTER'),
+            ('ALIGN', (3,0), (-1,-1), 'LEFT'),
+            ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+            ('INNERGRID', (0,0), (-1,-1), 0.3, colors.HexColor('#e2e8f0')),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f8fafc')]),
+            ('TOPPADDING', (0,0), (-1,-1), 5), ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+            ('LEFTPADDING', (0,0), (-1,-1), 4), ('RIGHTPADDING', (0,0), (-1,-1), 4),
+        ]))
+        story.append(ind_table)
+        story.append(Spacer(1, 16))
+
+    # ── AI Cohort Summary ──
+    if cohort_summary:
+        story.append(Paragraph("AI Cohort Summary", head_style))
+        story.append(Paragraph(cohort_summary, body_style))
+        story.append(Spacer(1, 16))
+
+
+    def add_footer(canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 7)
+        canvas.setFillColor(colors.HexColor('#94a3b8'))
+        canvas.drawString(0.75*inch, 0.4*inch,
+            "RubricAI v2 · CPS LEARN Lab · Northeastern University · Confidential Research Record")
+        canvas.drawRightString(letter[0] - 0.75*inch, 0.4*inch, f"Page {doc.page}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=add_footer, onLaterPages=add_footer)
+    buffer.seek(0)
+    return StreamingResponse(
+        buffer, media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=rubricai_cohort_report.pdf"}
     )
