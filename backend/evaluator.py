@@ -10,14 +10,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 CLAUDE_MODEL = "claude-haiku-4-5-20251001"  # fast + cheap for bulk evaluation
-MAX_CONCURRENT = 3  # parallel participants at once
+MAX_CONCURRENT = 10  # parallel participants; each runs 2 sessions in parallel → up to 20 concurrent API calls
 
 executor = ThreadPoolExecutor(max_workers=MAX_CONCURRENT * 2)
 
+# ── CLAUDE CLIENT (singleton — reuses connection pool across all threads) ──────
+_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-# ── CLAUDE CLIENT ─────────────────────────────────────────────
 def get_claude_client():
-    return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    return _client
 
 
 # ── RATE-LIMIT-AWARE CALL ─────────────────────────────────────
@@ -305,6 +306,7 @@ def evaluate_participant(
     duration_user = get_col(row, "duration_seconds_user", "duration_user", "user_duration", default=0)
     duration_client = get_col(row, "duration_seconds_client", "duration_client", "client_duration", default=0)
     completed_user = get_col(row, "completed_user", "completed", "status", default="Complete")
+    batch = get_col(row, "batch", "group", "cohort_group", "section", "class_group", default="")
 
     print(f"\n{'='*50}")
     print(f"Participant: {pid} | Sim: {simulation}")
@@ -314,6 +316,7 @@ def evaluate_participant(
     result = {
         "participant_id": str(pid) if pid else "unknown",
         "simulation": str(simulation) if simulation else "unknown",
+        "batch": str(batch) if batch else "",
         "completed": 1 if str(completed_user).lower() in ["complete", "yes", "1", "true", "y"] else 0,
         "comm_user": None, "ct_user": None,
         "comm_client": None, "ct_client": None,
@@ -373,14 +376,97 @@ def evaluate_participant(
     return result
 
 
-# ── ASYNC WRAPPER FOR PARALLEL EXECUTION ──────────────────────
+# ── ASYNC WRAPPER — parallel sessions per participant ─────────
 async def evaluate_participant_async(
     row, rubric_text, sel_u, sel_c,
     setup_data, rubric_desc_map, semaphore
 ):
     async with semaphore:
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            executor,
-            lambda: evaluate_participant(row, rubric_text, sel_u, sel_c, setup_data, rubric_desc_map)
+
+        # Extract row fields (sync, no I/O)
+        pid = get_col(row, "participant_id", "student_id", "id", "student", "name", "participant")
+        simulation = get_col(row, "simulation", "sim", "course", "assignment", "session_name", "scenario")
+        transcript_user = get_col(
+            row, "transcript_user", "user_transcript", "interview_transcript",
+            "transcript_a", "script_a", "user_session", "interview"
         )
+        transcript_client = get_col(
+            row, "transcript_client", "client_transcript", "client_conversation",
+            "transcript_b", "script_b", "client_session", "client"
+        )
+        duration_user  = get_col(row, "duration_seconds_user",   "duration_user",   "user_duration",   default=0)
+        duration_client = get_col(row, "duration_seconds_client", "duration_client", "client_duration", default=0)
+        completed_user  = get_col(row, "completed_user", "completed", "status", default="Complete")
+        batch           = get_col(row, "batch", "group", "cohort_group", "section", "class_group", default="")
+
+        print(f"\n{'='*50}")
+        print(f"Participant: {pid} | Sim: {simulation}")
+        print(f"  User transcript: {len(str(transcript_user))} chars")
+        print(f"  Client transcript: {len(str(transcript_client))} chars")
+
+        result = {
+            "participant_id": str(pid) if pid else "unknown",
+            "simulation":     str(simulation) if simulation else "unknown",
+            "batch":          str(batch) if batch else "",
+            "completed": 1 if str(completed_user).lower() in ["complete", "yes", "1", "true", "y"] else 0,
+            "comm_user": None, "ct_user": None,
+            "comm_client": None, "ct_client": None,
+            "_detail": {}
+        }
+
+        has_user   = transcript_user   and len(str(transcript_user).strip())   > 50
+        has_client = transcript_client and len(str(transcript_client).strip()) > 50
+        has_u_inds = sel_u and len(sel_u) > 0
+        has_c_inds = sel_c and len(sel_c) > 0
+
+        # ── Run both sessions in parallel ──────────────────────
+        async def run_user():
+            if not has_user:
+                print(f"  Skipping user interview — transcript too short or missing")
+                return None
+            if not has_u_inds:
+                print(f"  Skipping user interview — no indicators selected")
+                return None
+            return await loop.run_in_executor(
+                executor,
+                lambda: evaluate_session(
+                    transcript_user, pid, "user_interview",
+                    duration_user, rubric_text, sel_u, setup_data, rubric_desc_map
+                )
+            )
+
+        async def run_client():
+            if not has_client:
+                print(f"  Skipping client conversation — transcript too short or missing")
+                return None
+            if not has_c_inds:
+                print(f"  Skipping client conversation — no indicators selected")
+                return None
+            return await loop.run_in_executor(
+                executor,
+                lambda: evaluate_session(
+                    transcript_client, pid, "client_conversation",
+                    duration_client, rubric_text, sel_c, setup_data, rubric_desc_map
+                )
+            )
+
+        user_result, client_result = await asyncio.gather(run_user(), run_client())
+
+        if user_result:
+            comm, ct = calculate_scores(user_result.get("scores", {}), sel_u)
+            result["comm_user"] = comm
+            result["ct_user"]   = ct
+            result["_detail"]["user"] = user_result
+            for ind, data in user_result.get("scores", {}).items():
+                result[f"{ind}_user_score"] = data.get("score", 0)
+
+        if client_result:
+            comm, ct = calculate_scores(client_result.get("scores", {}), sel_c)
+            result["comm_client"] = comm
+            result["ct_client"]   = ct
+            result["_detail"]["client"] = client_result
+            for ind, data in client_result.get("scores", {}).items():
+                result[f"{ind}_client_score"] = data.get("score", 0)
+
+        return result

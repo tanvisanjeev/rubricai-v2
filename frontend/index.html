@@ -307,6 +307,16 @@ td{padding:9px 12px;color:var(--muted);white-space:nowrap;}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+/* SESSION MAP TABLE */
+.smap-table{width:100%;border-collapse:collapse;font-size:12px;}
+.smap-table th{text-align:left;padding:7px 12px;font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;}
+.smap-table td{padding:7px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.smap-table tr:last-child td{border-bottom:none;}
+.smap-table tr:nth-child(even) td{background:var(--surface2);}
+.smap-table tr:nth-child(odd) td{background:var(--surface);}
+.smap-select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:5px;font-size:11px;font-family:'Inter',sans-serif;outline:none;cursor:pointer;min-width:170px;}
+.smap-select:focus{border-color:var(--accent);}
+.batch-pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;background:var(--surface2);border:1px solid var(--border);color:var(--muted);}
 </style>
 </head>
 <body>
@@ -569,6 +579,7 @@ td{padding:9px 12px;color:var(--muted);white-space:nowrap;}
           <button class="btn btn-ghost btn-sm" onclick="selectAllInds(false)">Deselect All</button>
         </div>
       </div>
+      <div id="session-map-section" style="display:none;margin-bottom:16px;"></div>
       <div id="rubric-content">
         <div class="empty"><h3>Upload a rubric to get started</h3><p>Any markdown rubric will be parsed automatically.</p></div>
       </div>
@@ -653,6 +664,9 @@ td{padding:9px 12px;color:var(--muted);white-space:nowrap;}
             <option value="">All Status</option>
             <option value="completed">Completed</option>
             <option value="incomplete">Incomplete</option>
+          </select>
+          <select class="filter-select" id="filter-batch" onchange="applyFilters()" style="display:none">
+            <option value="">All Batches</option>
           </select>
           <input class="search-input" placeholder="Search participant ID..." oninput="applyFilters()" id="search-input"/>
         </div>
@@ -779,6 +793,8 @@ let detectedColumns=[],columnMapping={},csvSample={};
 let setupData={};
 let rubricDescMap={};
 let U_IND=[],C_IND=[],ALL_IND=[];
+let indSessionMap={};
+let batchGroups=[];
 let sortCol='',sortDir='asc';
 
 // ── CHIP TOGGLE ───────────────────────────────────────────────
@@ -861,18 +877,21 @@ function handleRubric(input){
     if(parsed.reduce((a,c)=>a+c.inds.length,0)>=1) parsedRubric=parsed;
     // Rebuild indicator lists from parsed rubric
     rubricDescMap={};
-    ALL_IND=[];U_IND=[];C_IND=[];
+    ALL_IND=[];U_IND=[];C_IND=[];indSessionMap={};
     parsedRubric.forEach(c=>c.inds.forEach(ind=>{
       rubricDescMap[ind.id]=ind.name;
       ALL_IND.push(ind.id);
-      if(c.session==='User Interview') U_IND.push(ind.id);
-      else C_IND.push(ind.id);
+      if(c.session==='User Interview'){U_IND.push(ind.id);indSessionMap[ind.id]='user';}
+      else{C_IND.push(ind.id);indSessionMap[ind.id]='client';}
     }));
     if(!U_IND.length&&!C_IND.length){
       U_IND=ALL_IND.slice(0,Math.ceil(ALL_IND.length/2));
       C_IND=ALL_IND.slice(Math.ceil(ALL_IND.length/2));
+      U_IND.forEach(id=>indSessionMap[id]='user');
+      C_IND.forEach(id=>indSessionMap[id]='client');
     } else if(!U_IND.length){
       U_IND=[...C_IND];C_IND=[];
+      U_IND.forEach(id=>indSessionMap[id]='user');
     }
     // Select ALL by default
     selectedInds=new Set(ALL_IND);
@@ -881,6 +900,7 @@ function handleRubric(input){
     document.getElementById('rubric-status-sub').textContent=parsedRubric.length+' clusters · '+totalInds+' indicators parsed';
     toast(rubricFile.name+' loaded. '+totalInds+' indicators found.','ok');
     renderRubric();
+    renderSessionMapping();
     updateStatusCards();
   };
   reader.readAsText(rubricFile);
@@ -949,6 +969,72 @@ function updateIndSelCount(){
   if(el) el.textContent=selectedInds.size;
 }
 
+// ── SESSION-INDICATOR MAPPING ─────────────────────────────────
+function renderSessionMapping(){
+  const el=document.getElementById('session-map-section');
+  if(!el) return;
+  if(!parsedRubric.length){el.style.display='none';return;}
+  const sess1=setupData.sess1||'User Interview';
+  const sess2=setupData.sess2||'Client Conversation';
+  el.style.display='block';
+  const rows=parsedRubric.flatMap(c=>c.inds.map(ind=>({
+    id:ind.id,name:ind.name,cluster:c.cluster,
+    session:indSessionMap[ind.id]||'client'
+  })));
+  el.innerHTML=`<div class="card" style="margin-bottom:0;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+      <div>
+        <div class="card-title">Session–Indicator Mapping</div>
+        <div class="card-sub" style="margin-bottom:0;">Override which session each indicator is evaluated in. Changes take effect on the next run.</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="resetSessionMapping()">&#8635; Reset to Auto-Detect</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="smap-table">
+        <thead><tr>
+          <th>ID</th><th>Indicator Name</th><th>Cluster</th><th>Session</th>
+        </tr></thead>
+        <tbody>
+          ${rows.map(r=>`<tr>
+            <td><span class="rind-id">${r.id}</span></td>
+            <td style="color:var(--text);font-weight:500;">${r.name}</td>
+            <td style="color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.cluster}">${r.cluster}</td>
+            <td><select class="smap-select" onchange="updateIndSession('${r.id}',this.value)">
+              <option value="user" ${r.session==='user'?'selected':''}>${sess1}</option>
+              <option value="client" ${r.session==='client'?'selected':''}>${sess2}</option>
+            </select></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function updateIndSession(id,newSession){
+  indSessionMap[id]=newSession;
+  U_IND=ALL_IND.filter(i=>indSessionMap[i]==='user');
+  C_IND=ALL_IND.filter(i=>indSessionMap[i]==='client');
+}
+
+function resetSessionMapping(){
+  U_IND=[];C_IND=[];indSessionMap={};
+  parsedRubric.forEach(c=>c.inds.forEach(ind=>{
+    if(c.session==='User Interview'){U_IND.push(ind.id);indSessionMap[ind.id]='user';}
+    else{C_IND.push(ind.id);indSessionMap[ind.id]='client';}
+  }));
+  if(!U_IND.length&&!C_IND.length){
+    U_IND=ALL_IND.slice(0,Math.ceil(ALL_IND.length/2));
+    C_IND=ALL_IND.slice(Math.ceil(ALL_IND.length/2));
+    U_IND.forEach(id=>indSessionMap[id]='user');
+    C_IND.forEach(id=>indSessionMap[id]='client');
+  } else if(!U_IND.length){
+    U_IND=[...C_IND];C_IND=[];
+    U_IND.forEach(id=>indSessionMap[id]='user');
+  }
+  renderSessionMapping();
+  toast('Session mapping reset to auto-detect.','ok');
+}
+
 // ── STATUS CARDS ──────────────────────────────────────────────
 function updateStatusCards(){
   const sc1=document.getElementById('sc-rubric');
@@ -994,6 +1080,7 @@ async function handleFile(input){
         else if(!columnMapping.completed_user&&/completed|status|done/i.test(c)) columnMapping.completed_user=col;
         else if(!columnMapping.transcript_user&&/transcript_user|user_transcript|interview|script_a|transcript_a/i.test(c)) columnMapping.transcript_user=col;
         else if(!columnMapping.transcript_client&&/transcript_client|client_transcript|client|script_b|transcript_b/i.test(c)) columnMapping.transcript_client=col;
+        else if(!columnMapping.batch&&/^batch$|^group$|^section$|cohort_group|class_group/i.test(c)) columnMapping.batch=col;
       });
       const sampleVals=lines[1]?lines[1].split(','):[];
       rawHeaders.forEach((col,i)=>{
@@ -1042,6 +1129,7 @@ function getSessionFieldKeys(){
     {key:'participant_id',label:'Participant ID *'},
     {key:'simulation',label:'Simulation / Course'},
     {key:'completed_user',label:'Completion Status'},
+    {key:'batch',label:'Batch / Group / Section'},
   ];
   for(let i=1;i<=n;i++){
     const sessLabel=document.getElementById(`setup-sess${i}`)?.value||`Session ${i}`;
@@ -1140,8 +1228,20 @@ function renderOv(){
   const ctv=results.map(s=>s.ct_user).filter(v=>v!=null);
   const avg=cv.length?(cv.reduce((a,b)=>a+b,0)/cv.length).toFixed(2):'N/A';
   const avgCT=ctv.length?(ctv.reduce((a,b)=>a+b,0)/ctv.length).toFixed(2):'N/A';
+  // Batch groups
+  batchGroups=[...new Set(results.map(s=>s.batch||'').filter(Boolean))].sort();
+  const batchFilter=document.getElementById('filter-batch');
+  if(batchFilter){
+    if(batchGroups.length>1){
+      batchFilter.innerHTML='<option value="">All Batches</option>'+batchGroups.map(b=>`<option value="${b}">${b}</option>`).join('');
+      batchFilter.style.display='';
+    } else {
+      batchFilter.style.display='none';
+    }
+  }
+  const batchMeta=batchGroups.length>1?` · ${batchGroups.length} batches`:'';
   document.getElementById('stats-row').innerHTML=`
-    <div class="stat-card"><div class="stat-label">Total Participants</div><div class="stat-value">${tot}</div><div class="stat-meta">Evaluated</div></div>
+    <div class="stat-card"><div class="stat-label">Total Participants</div><div class="stat-value">${tot}</div><div class="stat-meta">Evaluated${batchMeta}</div></div>
     <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value">${comp}</div><div class="stat-meta">Both sessions</div></div>
     <div class="stat-card"><div class="stat-label">Avg Comm Score</div><div class="stat-value" style="color:${scColor(parseFloat(avg))}">${avg}</div><div class="stat-meta">User Interview / 4.0</div></div>
     <div class="stat-card"><div class="stat-label">Avg CT Score</div><div class="stat-value" style="color:${scColor(parseFloat(avgCT))}">${avgCT}</div><div class="stat-meta">User Interview / 4.0</div></div>`;
@@ -1156,10 +1256,12 @@ function renderOv(){
 function applyFilters(){
   const q=(document.getElementById('search-input')?.value||'').toLowerCase();
   const status=document.getElementById('filter-status')?.value||'';
+  const batch=document.getElementById('filter-batch')?.value||'';
   let filtered=results.filter(s=>{
     if(q&&!s.participant_id.toLowerCase().includes(q)&&!s.simulation.toLowerCase().includes(q)) return false;
     if(status==='completed'&&s.completed!==1) return false;
     if(status==='incomplete'&&s.completed===1) return false;
+    if(batch&&(s.batch||'')!==batch) return false;
     return true;
   });
   renderTbl(filtered);
@@ -1182,9 +1284,11 @@ function renderTbl(data){
     });
   }
 
+  const hasBatch=batchGroups.length>0;
   document.getElementById('tbl-head').innerHTML=`<tr>
     <th onclick="sortTable('participant_id_str')">Participant ID</th>
     <th>Simulation</th>
+    ${hasBatch?'<th>Batch</th>':''}
     <th>Completed</th>
     ${activeInds.map(i=>`<th title="${rubricDescMap[i]||i}" onclick="sortTable('${i}${sfx}_score')">${shortName(i)}</th>`).join('')}
     <th onclick="sortTable('${ck}')">Comm</th>
@@ -1198,6 +1302,7 @@ function renderTbl(data){
     return`<tr>
       <td class="id-cell" onclick="openModal('${s.participant_id}')">${s.participant_id}</td>
       <td><span class="sim-pill">${s.simulation}</span></td>
+      ${hasBatch?`<td><span class="batch-pill">${s.batch||'—'}</span></td>`:''}
       <td class="${s.completed?'comp-y':'comp-n'}">${s.completed?'Yes':'No'}</td>
       ${activeInds.map(k=>`<td style="text-align:center" title="${rubricDescMap[k]||k}">${bdg(s[k+sfx+'_score'])}</td>`).join('')}
       <td class="sc" style="color:${scColor(cm)}">${cm??'—'}</td>
@@ -1719,7 +1824,7 @@ function showPage(p){
   }
   if(p==='overview') renderOv();
   if(p==='summary'){renderSum();if(results.length&&!cohortSummary)generateCohortSummary();}
-  if(p==='rubric') renderRubric();
+  if(p==='rubric'){renderRubric();renderSessionMapping();}
   if(p==='upload') updateStatusCards();
 }
 

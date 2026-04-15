@@ -90,6 +90,9 @@ async def detect_columns(file: UploadFile = File(...)):
                 mapping["duration_seconds_user"] = col
             elif any(k in c for k in ["duration_client", "duration_seconds_client"]):
                 mapping["duration_seconds_client"] = col
+            elif any(k in c for k in ["batch", "group", "section", "cohort_group", "class_group"]):
+                if "batch" not in mapping:
+                    mapping["batch"] = col
         # Fallback: long text columns are likely transcripts
         for col in columns:
             if col not in mapping.values():
